@@ -6,22 +6,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Habitville{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    {% block extra_css %}{% endblock %}
+    <style>
+        body, html {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #65dc6f; 
+            color: #333; 
+            height: 100%; 
+        }
+    
+        #app { 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+        }
+
+        .navbar-custom {
+            background-color: #4CAF50; 
+        }
+    
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-nav .nav-link {
+            color: white;
+        }
+    
+        .footer-custom {
+            background-color: #4CAF50; 
+            color: white;
+        }
+
+    .form-container {
+        max-width: 400px; 
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-container input[type="text"],
+    .form-container input[type="email"],
+    .form-container input[type="password"] {
+        width: 100%;
+        max-width: 400px; 
+        margin-bottom: 10px; 
+    }
+
+
+    .form-container ul {
+        list-style: none; 
+        padding: 0; 
+        margin-left: 20px; 
+    }
+
+    .form-container li {
+        position: relative; 
+        text-align: left;
+        margin-bottom: 5px; 
+        padding-left: 20px;
+    }
+
+    .form-container li::before {
+        content: "•"; 
+        position: absolute;
+        left: -20px; 
+        color: #333; 
+    }
+
+    </style>
+    
+    {% block extra_css %}
+    <style>
+        .home-title {
+            font-size: 3rem; 
+            margin-bottom: 1rem;
+        }
+        
+        .home-subtitle {
+            font-size: 2.5rem; 
+            margin-bottom: 0.5rem;
+        }
+    
+        .home-text {
+            font-size: 1.6rem; 
+            margin-bottom: 1rem;
+        }
+
+        .home-container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        
+    </style>
+    {% endblock %}
 </head>
 <body>
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div id="app">
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand" href="{% url 'main_spa' %}">Habitville</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_authenticated %}
                     <script>
-                        window.location.href = "http://localhost:5173/";  
+                        window.location.href = "http://localhost:5173/";
                     </script>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'signup' %}">Signup</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login_view' %}">Login</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -29,13 +126,35 @@
         </div>
     </nav>
 
-    {% block content %}{% endblock %}
+    <div class="container-custom">
+        {% block content %}
+        {% if welcome_content %}
+            <div class="home-container">
+                <h1 class="home-title">Welcome to Habitville</h1>
+                <p class="home-text">Habitville is a gamified habit tracker designed specifically for university students. We understand the struggle of maintaining positive habits, managing time effectively, and dealing with stress. That's where Habitville comes in, transforming your daily routines into exciting adventures!</p>
+        
+                <h2 class="home-subtitle">Gamify Your Life</h2>
+                <p class="home-text">Immerse yourself in the Habitville world where your progress brings life to a virtual village. Complete habits to play minigames, earn resources, and upgrade your own virtual village!</p>
+        
+                <h2 class="home-subtitle">Engaging Minigames</h2>
+                <p class="home-text">Dive into a variety of minigames, such as our relaxing fishing game! Take a well-deserved break by casting your line and reeling in rewards for your village.</p>
+        
+                <h2 class="home-subtitle">Organise Your Life</h2>
+                <p class="home-text">Set up daily and recurring habits easily as well as one-off tasks. Track your progress with detailed statistics to see how you're improving over time.</p>
+            </div>
+        {% else %}
+            <p class="text-center">Please signup or login.</p>
+        {% endif %}
+    {% endblock %}    
+    </div>
 
-    <footer class="footer bg-dark text-white mt-4">
-        <div class="container text-center py-3">
+    <footer class="footer footer-custom mt-auto py-3">
+        <div class="container text-center">
             &copy; {% now "Y" %} Habitville
         </div>
     </footer>
+
+</div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>

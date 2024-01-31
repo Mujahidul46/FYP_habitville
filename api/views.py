@@ -10,7 +10,12 @@ import json
 
 
 def main_spa(request: HttpRequest) -> HttpResponse:
-    return render(request, 'base.html', {})
+    if not request.user.is_authenticated:
+        return render(request, 'base.html', {
+            'welcome_content': True  
+        })
+    return render(request, 'base.html')
+
 
 @csrf_exempt
 def signup_view(request: HttpRequest) -> HttpResponse:
