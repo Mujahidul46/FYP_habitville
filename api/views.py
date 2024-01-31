@@ -6,6 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm
 from django.contrib.auth.decorators import login_required
 from .models import User
+import json
 
 
 def main_spa(request: HttpRequest) -> HttpResponse:
@@ -60,3 +61,27 @@ def user_api(request: HttpRequest) -> JsonResponse:
             'goals': request.user.goals
         })
     return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
+
+@login_required
+@csrf_exempt
+def update_user_profile(request: HttpRequest) -> JsonResponse:
+    """
+    Updates the authenticated user's profile.
+    """
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            user.username = data.get('username', user.username)
+            user.email = data.get('email', user.email)
+            user.goals = data.get('goals', user.goals)
+            user.save()
+            return JsonResponse({
+                'username': user.username,
+                'email': user.email,
+                'goals': user.goals
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Only PUT method is allowed'}, status=400)

@@ -1,22 +1,25 @@
 <template>
-    <div class="profile-page">
-      <h1>Profile</h1>
+  <div class="profile-page">
+    <h1>Profile</h1>
+    <form @submit.prevent="updateProfile">
       <div>
-        <label>Username:</label>
-        <p>{{ user.username }}</p>
+        <label for="username">Username:</label>
+        <input id="username" v-model="user.username" />
       </div>
       <div>
-        <label>Email:</label>
-        <p>{{ user.email }}</p>
+        <label for="email">Email:</label>
+        <input id="email" type="email" v-model="user.email" />
       </div>
       <div>
-        <label>Goals:</label>
-        <p>{{ user.goals }}</p>
+        <label for="goals">Goals:</label>
+        <textarea id="goals" placeholder="Write your goals and motivations here!" v-model="user.goals"></textarea>
       </div>
-    </div>
-  </template>
+      <button type="submit">Update Profile</button>
+    </form>
+  </div>
+</template>
   
-  <script lang="ts">
+<script lang="ts">
   import { defineComponent, ref } from "vue";
   
   interface UserData {
@@ -55,13 +58,34 @@
         }
       };
   
-      fetchUserProfile();
+      const updateProfile = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/user/update/", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user.value),
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          console.log("Profile updated successfully");
+        } else {
+          console.error("Failed to update profile:", response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error("Error updating profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+
+    return { user, updateProfile };
+  },
+});
+</script>
   
-      return { user };
-    },
-  });
-  </script>
-  
-  <style scoped>
-  </style>
+<style scoped>
+</style>
   
