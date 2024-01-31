@@ -1,23 +1,56 @@
-// Example of how to use Vue Router
+import { createRouter, createWebHistory, RouteRecordRaw, NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 
-import { createRouter, createWebHistory } from 'vue-router'
-
-// 1. Define route components.
-// These can be imported from other files
 import MainPage from '../pages/MainPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
 
-// 2. Define some routes
-// Each route should map to a component.
-// We'll talk about nested routes later.
+const routes: Array<RouteRecordRaw> = [
+    { path: '/', name: 'Main Page', component: MainPage, meta: { requiresAuth: true }  },
+    { path: '/profile/', name: 'Profile Page', component: ProfilePage, meta: { requiresAuth: true } },
+];
+
 const router = createRouter({
     history: createWebHistory(base),
-    routes: [
-        { path: '/', name: 'Main Page', component: MainPage },
-        { path: '/profile/', name: 'Profile Page', component: ProfilePage },
-    ]
-})
+    routes
+});
 
-export default router
+async function isLoggedIn(): Promise<boolean> {
+    try {
+        const response = await fetch('http://localhost:8000/check_authentication/', {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data.isAuthenticated;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        return false;
+    }
+}
+
+router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+    const auth = await isLoggedIn();
+
+    if (to.path === '/login/') {
+        // If user goes to protected URL "http://localhost:5173/login/" redirect them to login form URL
+        if (!auth) {
+            window.location.href = 'http://localhost:8000/login/';
+            return;
+        } else {
+            next({ path: '/' }); 
+            return;
+        }
+    }
+
+    if (to.matched.some(record => record.meta.requiresAuth) && !auth) {
+        window.location.href = 'http://localhost:8000/login/';
+        return;
+    }
+    
+    next();
+});
+
+export default router;

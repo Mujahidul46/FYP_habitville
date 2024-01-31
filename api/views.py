@@ -9,7 +9,7 @@ from .models import User
 import json
 
 
-def main_spa(request: HttpRequest) -> HttpResponse:
+def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
             'welcome_content': True  
@@ -90,3 +90,6 @@ def update_user_profile(request: HttpRequest) -> JsonResponse:
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Only PUT method is allowed'}, status=400)
+    
+def check_authentication(request):
+    return JsonResponse({'isAuthenticated': request.user.is_authenticated})

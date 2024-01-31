@@ -16,6 +16,7 @@
       </div>
       <button type="submit">Update Profile</button>
     </form>
+    <p v-if="statusMessage" class="status-message">{{ statusMessage }}</p>
   </div>
 </template>
   
@@ -35,6 +36,8 @@
         email: "",
         goals: "",
       });
+
+      const statusMessage = ref("");
   
       const fetchUserProfile = async () => {
         try {
@@ -70,22 +73,40 @@
         });
 
         if (response.ok) {
-          console.log("Profile updated successfully");
-        } else {
-          console.error("Failed to update profile:", response.status, response.statusText);
+            statusMessage.value = "Profile updated successfully"; 
+          } else {
+            statusMessage.value = "Failed to update profile. Please try again."; 
+          }
+        } catch (error) {
+          statusMessage.value = "An error occurred while updating the profile."; 
         }
-      } catch (error) {
-        console.error("Error updating profile:", error);
-      }
-    };
+      };
 
     fetchUserProfile();
 
-    return { user, updateProfile };
+    return { user, updateProfile, statusMessage };
   },
 });
 </script>
   
 <style scoped>
+.profile-page input,
+.profile-page textarea {
+    background-color: white; 
+    border: 1px solid #ccc; 
+    padding: 8px; 
+    margin-bottom: 10px; 
+    width: 100%; 
+}
+
+.profile-page button {
+    background-color: #1a1a80; 
+    color: white; 
+    padding: 8px 16px; 
+    border: none;
+    cursor: pointer; 
+    margin-top: 10px; 
+}
+
+
 </style>
-  
