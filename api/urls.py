@@ -12,4 +12,5 @@ urlpatterns = [
     path('create-todo/', views.create_todo_view, name='create_todo'),
     path('list-todo/', views.list_todo_view, name='list_todo'),
     path('csrf/', views.csrf, name='csrf'), 
+    path('update-todo/<int:pk>/', views.update_todo_view, name='update_todo'),
 ]

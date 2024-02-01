@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import User, ToDo
 import json
 from django.middleware.csrf import get_token 
+from django.forms.models import model_to_dict
 
 
 def main_spa(request: HttpRequest) -> HttpResponse: 
@@ -116,6 +117,23 @@ def create_todo_view(request: HttpRequest) -> HttpResponse:
 def list_todo_view(request: HttpRequest) -> HttpResponse:
     todos = ToDo.objects.filter(user=request.user).values('id', 'title', 'notes', 'created_at', 'updated_at')
     return JsonResponse(list(todos), safe=False)
+
+@csrf_exempt
+@login_required
+def update_todo_view(request: HttpRequest, pk: int) -> HttpResponse:
+    todo = get_object_or_404(ToDo, pk=pk, user=request.user)
+
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        form = ToDoForm(data, instance=todo)
+        if form.is_valid():
+            updated_todo = form.save()
+            todo_data = model_to_dict(updated_todo, fields=['id', 'title', 'notes', 'created_at', 'updated_at'])
+            return JsonResponse(todo_data, status=200)  
+        else:
+            return JsonResponse(form.errors, status=400)
+    else:
+        return HttpResponseNotAllowed(['PUT'])
 
 @csrf_exempt
 def csrf(request):
