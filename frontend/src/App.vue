@@ -78,26 +78,17 @@ body, html {
     background-color: #4CAF50; 
 }
 
-.navbar-custom .navbar-brand {
-    color: white;
-    cursor: default; 
-}
-
-.navbar-custom .navbar-brand:hover {
-    color: white; 
-}
-
-.navbar-custom .navbar-nav .nav-link {
-    color: white;
-}
-
+.navbar-custom .navbar-brand,
+.navbar-custom .navbar-brand:hover,
+.navbar-custom .navbar-nav .nav-link,
 .navbar-custom .navbar-nav .nav-link:hover {
-    color: white; 
+    color: white;
+    cursor: pointer; 
 }
 
 main {
     flex: 1; 
-    background-color: inherit; 
+    background-color: #65dc6f; 
 }
 
 .footer-custom {
@@ -105,7 +96,61 @@ main {
     color: white;
 }
 
-main * {
-    background-color: inherit;
+#app .modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; 
+}
+
+#app .modal-content {
+  background-color: #FFF;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  width: auto; 
+  max-width: 500px; 
+  z-index: 10000; 
+}
+
+#app .modal-content input,
+#app .modal-content textarea {
+  width: calc(100% - 20px); 
+  padding: 10px;
+  margin-bottom: 15px; 
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#app .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#app .modal-footer button {
+  margin-left: 10px;
+}
+
+#app .modal-footer button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#app .modal-footer button[type="button"] {
+  background-color: transparent;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
 }
 </style>
