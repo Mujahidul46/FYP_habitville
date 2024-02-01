@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User
+from .models import User, ToDo
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -12,4 +12,18 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('email', 'username', 'password1', 'password2', 'goals')}),
     )
 
+class ToDoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'user')
+    search_fields = ('title', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
+
+# Register your models here.
 admin.site.register(User, UserAdmin)
+admin.site.register(ToDo, ToDoAdmin)

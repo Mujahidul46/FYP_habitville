@@ -1,14 +1,15 @@
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, ToDoForm
 from django.contrib.auth.decorators import login_required
-from .models import User
+from .models import User, ToDo
 import json
+from django.middleware.csrf import get_token 
 
-#TO DO: add comments for each view
+
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
@@ -93,3 +94,29 @@ def update_user_profile(request: HttpRequest) -> JsonResponse:
     
 def check_authentication(request):
     return JsonResponse({'isAuthenticated': request.user.is_authenticated})
+
+@csrf_exempt
+@login_required
+def create_todo_view(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = ToDoForm(data)  
+        if form.is_valid():
+            todo = form.save(commit=False)
+            todo.user = request.user
+            todo.save()
+            return JsonResponse({'message': 'To Do created successfully!', 'id': todo.id}, status=201)
+        else:
+            return JsonResponse(form.errors, status=400)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+@csrf_exempt
+@login_required
+def list_todo_view(request: HttpRequest) -> HttpResponse:
+    todos = ToDo.objects.filter(user=request.user).values('id', 'title', 'notes', 'created_at', 'updated_at')
+    return JsonResponse(list(todos), safe=False)
+
+@csrf_exempt
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})

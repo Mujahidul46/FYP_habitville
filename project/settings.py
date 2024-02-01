@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'project.urls'
 LOGIN_REDIRECT_URL = 'home'
 CORS_ALLOWED_ORIGINS = [
