@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import User
 import json
 
-
+#TO DO: add comments for each view
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
         return render(request, 'base.html', {

@@ -107,6 +107,4 @@
     cursor: pointer; 
     margin-top: 10px; 
 }
-
-
 </style>

@@ -1,9 +1,18 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
-      <a class="navbar-brand">Habitville</a>
+      <span class="navbar-brand">Habitville</span>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
+          <!-- Habit Tracker button -->
+          <li class="nav-item">
+            <router-link
+              to="/"
+              class="btn btn-outline-light m-2"
+            >
+              Habit Tracker
+            </router-link>
+          </li>
           <!-- Profile Page button -->
           <li class="nav-item">
             <router-link
@@ -33,6 +42,7 @@
   </main>
 </template>
 
+
 <script lang="ts">
 import { defineComponent } from "vue";
 import { RouterView } from "vue-router";
@@ -49,12 +59,11 @@ export default defineComponent({
 </script>
 
 <style>
-/* Global styles */
 body, html {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #65dc6f; /* Lighter green background */
+    background-color: #65dc6f; 
     color: #333;
 }
 
@@ -62,33 +71,41 @@ body, html {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #65dc6f; /* Ensures that the flex container also has a green background */
+    background-color: #65dc6f; 
 }
 
 .navbar-custom {
-    background-color: #4CAF50; /* Dark green navbar */
+    background-color: #4CAF50; 
 }
 
-.navbar-custom .navbar-brand,
+.navbar-custom .navbar-brand {
+    color: white;
+    cursor: default; 
+}
+
+.navbar-custom .navbar-brand:hover {
+    color: white; 
+}
+
 .navbar-custom .navbar-nav .nav-link {
     color: white;
 }
 
-main {
-    flex: 1; /* Makes sure the main content area expands to fill the available space */
-    background-color: inherit; /* This will ensure it inherits the #app's background color */
+.navbar-custom .navbar-nav .nav-link:hover {
+    color: white; 
 }
 
-/* Add footer styles if you have a footer */
+main {
+    flex: 1; 
+    background-color: inherit; 
+}
+
 .footer-custom {
-    background-color: #4CAF50; /* Dark green footer */
+    background-color: #4CAF50; 
     color: white;
 }
 
-/* Ensures that any content within main also has a green background */
 main * {
     background-color: inherit;
 }
-
-/* Additional global styles can go here */
 </style>

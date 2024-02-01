@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory, RouteRecordRaw, NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 
-import MainPage from '../pages/MainPage.vue';
+import HabitTracker from '../pages/HabitTracker.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
 
 const routes: Array<RouteRecordRaw> = [
-    { path: '/', name: 'Main Page', component: MainPage, meta: { requiresAuth: true }  },
+    { path: '/', name: 'Habit Tracker', component: HabitTracker, meta: { requiresAuth: true } },
     { path: '/profile/', name: 'Profile Page', component: ProfilePage, meta: { requiresAuth: true } },
 ];
 
