@@ -29,6 +29,8 @@ class ToDo(models.Model):
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    completed = models.BooleanField(default=False)  
+    completed_at = models.DateTimeField(null=True, blank=True)  
 
     def __str__(self):
         return self.title
@@ -41,4 +43,11 @@ class ToDo(models.Model):
             'notes': self.notes,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
+            'completed': self.completed,
+            'completed_at': self.completed_at.strftime('%Y-%m-%d %H:%M:%S') if self.completed_at else None,
         }
+    
+    def save(self, *args, **kwargs):
+        if self.completed and not self.completed_at:
+            self.completed_at = now()
+        super(ToDo, self).save(*args, **kwargs)

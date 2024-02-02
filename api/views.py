@@ -9,8 +9,7 @@ from .models import User, ToDo
 import json
 from django.middleware.csrf import get_token 
 from django.forms.models import model_to_dict
-
-
+from django.utils.timezone import now
 
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
@@ -102,12 +101,13 @@ def check_authentication(request):
 def create_todo_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         data = json.loads(request.body)
-        form = ToDoForm(data)  
+        form = ToDoForm(data)
         if form.is_valid():
             todo = form.save(commit=False)
             todo.user = request.user
             todo.save()
-            return JsonResponse({'message': 'To Do created successfully!', 'id': todo.id}, status=201)
+            todo_data = model_to_dict(todo)
+            return JsonResponse(todo_data, status=201)
         else:
             return JsonResponse(form.errors, status=400)
     else:
@@ -116,8 +116,11 @@ def create_todo_view(request: HttpRequest) -> HttpResponse:
 @csrf_exempt
 @login_required
 def list_todo_view(request: HttpRequest) -> HttpResponse:
-    todos = ToDo.objects.filter(user=request.user).values('id', 'title', 'notes', 'created_at', 'updated_at')
+    todos = ToDo.objects.filter(user=request.user, completed=False).values(
+        'id', 'title', 'notes', 'created_at', 'updated_at', 'completed'
+    )
     return JsonResponse(list(todos), safe=False)
+
 
 @csrf_exempt
 @login_required
@@ -151,3 +154,28 @@ def delete_todo_view(request: HttpRequest, pk: int) -> HttpResponse:
 @csrf_exempt
 def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
+
+@csrf_exempt
+@login_required
+def complete_todo_view(request: HttpRequest, pk: int) -> HttpResponse:
+    todo = get_object_or_404(ToDo, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        completed_status = data.get('completed', False)
+        
+        todo.completed = completed_status
+        if completed_status:
+            todo.completed_at = now()
+        todo.save(update_fields=['completed', 'completed_at'])
+        
+        todo_data = model_to_dict(todo, fields=['id', 'title', 'notes', 'created_at', 'updated_at', 'completed', 'completed_at'])
+        return JsonResponse(todo_data, status=200)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+@login_required
+def list_completed_todos_view(request: HttpRequest) -> HttpResponse:
+    completed_todos = ToDo.objects.filter(user=request.user, completed=True)
+    todos_data = [model_to_dict(todo, fields=['id', 'title', 'notes', 'created_at', 'updated_at', 'completed', 'completed_at']) for todo in completed_todos]
+    return JsonResponse(todos_data, safe=False, status=200)

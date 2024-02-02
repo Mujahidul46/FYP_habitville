@@ -1,19 +1,35 @@
 <template>
-    <div class="habit-tracker">
-      <h1>This is your habit tracker!</h1>
-      <div class="todo-list-container">
-        <h2>Your To Dos</h2>
-        <button class="add-todo-btn" @click="toggleForm">Add a To Do</button>
-        <ul>
-          <li v-for="todo in todos" :key="todo.id" class="todo-item" @click="editTodo(todo)">
-            <div class="todo-content">
-              <h3>{{ todo.title }}</h3>
-              <p>{{ todo.notes }}</p>
-            </div>
-            <i class="fas fa-trash delete-todo-btn" @click.stop="confirmDelete(todo)"></i>
-          </li>
-        </ul>
-      </div>
+  <div class="habit-tracker">
+    <h1>This is your habit tracker!</h1>
+    <div class="todo-list-container">
+      <button class="view-toggle" @click="toggleView('todos')">To Do's</button>
+      <button class="view-toggle" @click="toggleView('accomplished')">Accomplished</button>
+      <button class="add-todo-btn" @click="toggleForm">Add a To Do</button>
+
+      <ul v-if="currentView === 'todos'">
+        <li v-for="todo in todos" :key="todo.id" class="todo-item">
+          <div class="todo-checkbox" @click.stop="markAsCompleted(todo)">
+            <i class="far" :class="{ 'fa-square': !todo.completed, 'fa-check-square': todo.completed }"></i>
+          </div>
+          <div class="todo-content" @click="editTodo(todo)">
+            <h3>{{ todo.title }}</h3>
+            <p>{{ todo.notes }}</p>
+          </div>
+          <i class="fas fa-trash delete-todo-btn" @click.stop="confirmDelete(todo)"></i>
+        </li>
+      </ul>
+
+      <ul v-if="currentView === 'accomplished'">
+        <li v-for="todo in accomplishedTodos" :key="todo.id" class="todo-item">
+          <div class="todo-content">
+            <h3>{{ todo.title }}</h3>
+            <p>{{ todo.notes }}</p>
+            <small>{{ formatDate(todo.completed_at) }}</small>
+          </div>
+        </li>
+      </ul>
+    </div>
+
       <div v-if="showForm" class="modal-backdrop">
         <div class="modal-content">
           <h2 class="form-title">{{ editingTodo ? 'Edit To Do' : 'Create To Do' }}</h2>
@@ -56,6 +72,8 @@ export default {
         notes: ''
       },
       todos: [],
+      accomplishedTodos: [],
+      currentView: 'todos',
       showForm: false,
       editingTodo: null, 
       showDeleteConfirm: false, 
@@ -75,46 +93,50 @@ export default {
         }
         },
         async createToDo() {
-        console.log("Creating new todo with data:", this.newTodo);
-        try {
+          console.log("Creating new todo with data:", this.newTodo);
+          try {
             const response = await fetch("http://localhost:8000/create-todo/", {
-            method: 'POST',
-            headers: {
+              method: 'POST',
+              headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': this.csrfToken,
-            },
-            body: JSON.stringify(this.newTodo),
-            credentials: 'include',
+              },
+              body: JSON.stringify(this.newTodo),
+              credentials: 'include',
             });
             if (response.ok) {
-            const createdTodo = await response.json();
-            this.todos.push(createdTodo);
-            this.newTodo.title = '';
-            this.newTodo.notes = '';
-            
-            this.fetchToDos();
-            this.showForm = false;
+              const createdTodo = await response.json();
+              if (!createdTodo.completed) {
+                this.todos.push(createdTodo);
+              }
+              this.newTodo.title = '';
+              this.newTodo.notes = '';
+              this.showForm = false;
             } else {
-            console.error('Failed to create to-do:', await response.text());
+              console.error('Failed to create to-do:', await response.text());
             }
-        } catch (error) {
+          } catch (error) {
             console.error('Error creating to-do:', error);
-        }
+          }
         },
+
+
         async fetchToDos() {
-        try {
+          try {
             const response = await fetch("http://localhost:8000/list-todo/", {
-            credentials: 'include'
+              credentials: 'include'
             });
             if (response.ok) {
-            this.todos = await response.json();
+              const fetchedTodos = await response.json();
+              this.todos = fetchedTodos.filter(todo => !todo.completed);
             } else {
-            console.error('Failed to fetch to-dos:', await response.text());
+              console.error('Failed to fetch to-dos:', await response.text());
             }
-        } catch (error) {
+          } catch (error) {
             console.error('Error fetching to-dos:', error);
-        }
+          }
         },
+
         toggleForm() {
             this.showForm = !this.showForm;
             if (!this.showForm) {
@@ -219,6 +241,53 @@ export default {
       this.showDeleteConfirm = false; 
       this.toDeleteTodo = null; 
     },
+    async markAsCompleted(todo) {
+      try {
+        const response = await fetch(`http://localhost:8000/mark-completed/${todo.id}/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.csrfToken,
+          },
+          body: JSON.stringify({ completed: true }),
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          this.todos = this.todos.filter(t => t.id !== todo.id);
+          this.fetchAccomplishedToDos();
+        } else {
+          console.error('Failed to mark to-do as completed:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error marking to-do as completed:', error);
+      }
+    },
+
+    async fetchAccomplishedToDos() {
+      try {
+        const response = await fetch(`http://localhost:8000/list-completed/`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          this.accomplishedTodos = await response.json();
+        } else {
+          console.error('Failed to fetch accomplished to-dos:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error fetching accomplished to-dos:', error);
+      }
+    },
+    toggleView(view) {
+      this.currentView = view;
+      if (view === 'accomplished') {
+        this.fetchAccomplishedToDos();
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    },
   },
     created() {
         this.fetchCSRFToken();
@@ -297,35 +366,41 @@ export default {
     }
 
     .todo-item {
-        transition: border-color 0.3s ease;
-        cursor: pointer;
-        padding: 10px;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+      padding: 10px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      align-items: center; 
     }
 
     .todo-item:hover {
         border-color: #faa404;
     }
 
-    
-    .todo-content h3,
-    .todo-content p {
-        word-break: break-all; 
-        margin: 0;
-        padding: 5px;
+    .todo-content {
+      flex-grow: 1;
+      padding: 5px;
+      text-align: left;
     }
 
+    .todo-content h3 {
+      word-break: break-all;
+      margin: 0;
+      font-size: 18px; 
+    }
 
+    .todo-content p {
+      word-break: break-all;
+      margin: 0;
+      font-size: 14px; 
+    }
     .delete-todo-btn {
     visibility: hidden; 
     color: #f44336; 
     cursor: pointer;
-    position: absolute; 
-    right: 25px; 
+    flex-shrink: 0;
     }
 
     .todo-item:hover .delete-todo-btn {
@@ -338,5 +413,14 @@ export default {
     color: white;
     border: none;
     cursor: pointer;
+    }
+
+    .todo-checkbox {
+      margin-right: 10px; 
+      flex-shrink: 0; 
+    }
+
+    .view-toggle {
+      margin-right: 10px; 
     }
 </style>

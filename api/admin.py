@@ -13,10 +13,10 @@ class UserAdmin(BaseUserAdmin):
     )
 
 class ToDoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'user')
+    list_display = ('title', 'user', 'created_at', 'updated_at', 'completed', 'completed_at')
+    list_filter = ('created_at', 'user', 'completed')
     search_fields = ('title', 'notes')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'completed_at')  
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -24,6 +24,5 @@ class ToDoAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(user=request.user)
 
-# Register your models here.
 admin.site.register(User, UserAdmin)
 admin.site.register(ToDo, ToDoAdmin)
