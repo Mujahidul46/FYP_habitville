@@ -11,6 +11,7 @@ from django.middleware.csrf import get_token
 from django.forms.models import model_to_dict
 
 
+
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
@@ -134,6 +135,18 @@ def update_todo_view(request: HttpRequest, pk: int) -> HttpResponse:
             return JsonResponse(form.errors, status=400)
     else:
         return HttpResponseNotAllowed(['PUT'])
+    
+@csrf_exempt
+@login_required
+def delete_todo_view(request: HttpRequest, pk: int) -> HttpResponse:
+    todo = get_object_or_404(ToDo, pk=pk, user=request.user)
+    
+    if request.method == 'DELETE':
+        todo.delete()
+        return JsonResponse({'message': 'To Do deleted successfully!'}, status=204)
+    else:
+        return HttpResponseNotAllowed(['DELETE'])
+
 
 @csrf_exempt
 def csrf(request):

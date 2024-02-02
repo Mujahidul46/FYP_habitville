@@ -1,36 +1,49 @@
 <template>
     <div class="habit-tracker">
-        <h1>This is your habit tracker!</h1>
-        <div class="todo-list-container">
-            <h2>Your To Dos</h2>
-            <button class="add-todo-btn" @click="toggleForm">Add a To Do</button>
-            <ul>
-                <li v-for="todo in todos" :key="todo.id" class="todo-item" @click="editTodo(todo)">
-                    <div class="todo-content">
-                        <h3>{{ todo.title }}</h3>
-                        <p>{{ todo.notes }}</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <div v-if="showForm" class="modal-backdrop">
-            <div class="modal-content" @click.stop>
-                <h2 class="form-title">{{ editingTodo ? 'Edit To Do' : 'Create To Do' }}</h2>
-                <form @submit.prevent="handleSubmit">
-                    <label for="titleInput">Title<span class="required-asterisk">*</span></label>
-                    <input id="titleInput" v-model="newTodo.title" placeholder="Add a title" required>
-                    <label for="notesInput">Notes</label>
-                    <textarea id="notesInput" v-model="newTodo.notes" placeholder="Add notes"></textarea>
-                    <div class="modal-footer">
-                        <button type="button" @click="toggleForm">Cancel</button>
-                        <button type="submit">{{ editingTodo ? 'Update' : 'Create' }}</button>
-                    </div>
-                </form>
+      <h1>This is your habit tracker!</h1>
+      <div class="todo-list-container">
+        <h2>Your To Dos</h2>
+        <button class="add-todo-btn" @click="toggleForm">Add a To Do</button>
+        <ul>
+          <li v-for="todo in todos" :key="todo.id" class="todo-item" @click="editTodo(todo)">
+            <div class="todo-content">
+              <h3>{{ todo.title }}</h3>
+              <p>{{ todo.notes }}</p>
             </div>
+            <i class="fas fa-trash delete-todo-btn" @click.stop="confirmDelete(todo)"></i>
+          </li>
+        </ul>
+      </div>
+      <div v-if="showForm" class="modal-backdrop">
+        <div class="modal-content">
+          <h2 class="form-title">{{ editingTodo ? 'Edit To Do' : 'Create To Do' }}</h2>
+          <form @submit.prevent="handleSubmit">
+            <label for="titleInput">Title<span class="required-asterisk">*</span></label>
+            <input id="titleInput" v-model="newTodo.title" placeholder="Add a title" required>
+            <label for="notesInput">Notes</label>
+            <textarea id="notesInput" v-model="newTodo.notes" placeholder="Add notes"></textarea>
+            <div class="modal-footer">
+              <button v-if="editingTodo" type="button" class="delete-edit-todo-btn" @click="confirmDelete(editingTodo)">
+                Delete
+              </button>
+              <button type="button" @click="toggleForm">Cancel</button>
+              <button type="submit">{{ editingTodo ? 'Update' : 'Create' }}</button>
+            </div>
+          </form>
         </div>
+      </div>
+      <div v-if="showDeleteConfirm" class="modal-backdrop">
+        <div class="modal-content">
+          <h2 class="form-title">Are you sure you want to delete this To Do item?</h2>
+          <div class="modal-footer">
+            <button type="button" @click="cancelDelete">Cancel</button>
+            <button type="button" @click="deleteToDo">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
-</template>
-
+  </template>
+  
 <script>
 export default {
   name: 'HabitTracker',
@@ -45,6 +58,8 @@ export default {
       todos: [],
       showForm: false,
       editingTodo: null, 
+      showDeleteConfirm: false, 
+      toDeleteTodo: null,
     };
   },
     methods: {
@@ -169,6 +184,41 @@ export default {
             console.error('Error updating to-do:', error);
         }
     },
+    async deleteToDo() {
+        if (!this.toDeleteTodo) return;
+        try {
+            const response = await fetch(`http://localhost:8000/delete-todo/${this.toDeleteTodo.id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': this.csrfToken,
+            },
+            credentials: 'include',
+            });
+            
+            if (response.ok) {
+            this.todos = this.todos.filter(todo => todo.id !== this.toDeleteTodo.id);
+            this.resetForm(); 
+            this.showForm = false;
+            this.showDeleteConfirm = false; 
+            this.toDeleteTodo = null; 
+            } else {
+            console.error('Failed to delete to-do:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error deleting to-do:', error);
+        }
+    },
+
+
+    confirmDelete(todo) {
+      this.toDeleteTodo = todo;
+      this.showDeleteConfirm = true; 
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirm = false; 
+      this.toDeleteTodo = null; 
+    },
   },
     created() {
         this.fetchCSRFToken();
@@ -177,7 +227,7 @@ export default {
     };
 </script>
 
-<style>
+<style scoped>
     .habit-tracker form {
     margin-bottom: 1em;
     }
@@ -236,33 +286,57 @@ export default {
     }
 
     .add-todo-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    cursor: pointer;
-    padding: 0.5em;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+        padding: 0.5em;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
     }
 
     .todo-item {
-        transition: border-color 0.05s ease; 
-        cursor: pointer; 
-        padding: 10px; 
-        border: 2px solid transparent; 
-        border-radius: 10px; 
+        transition: border-color 0.3s ease;
+        cursor: pointer;
+        padding: 10px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .todo-item:hover {
-        border-color: #faa404; 
+        border-color: #faa404;
     }
 
-    .todo-content h3, 
+    
+    .todo-content h3,
     .todo-content p {
-        margin: 0; 
-        padding: 5px; 
+        word-break: break-all; 
+        margin: 0;
+        padding: 5px;
     }
 
-</style>
 
+    .delete-todo-btn {
+    visibility: hidden; 
+    color: #f44336; 
+    cursor: pointer;
+    position: absolute; 
+    right: 25px; 
+    }
+
+    .todo-item:hover .delete-todo-btn {
+    visibility: visible; 
+    }
+
+    .modal-footer .delete-edit-todo-btn {
+    padding: 0.5em;
+    background-color: #f44336; 
+    color: white;
+    border: none;
+    cursor: pointer;
+    }
+</style>

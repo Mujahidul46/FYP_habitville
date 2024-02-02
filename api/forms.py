@@ -21,7 +21,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm Password'})
 
 class ToDoForm(forms.ModelForm):
-    title = forms.CharField(required=True, max_length=200)
+    title = forms.CharField(required=True, widget=forms.Textarea)
     notes = forms.CharField(required=False, widget=forms.Textarea)
 
     class Meta:

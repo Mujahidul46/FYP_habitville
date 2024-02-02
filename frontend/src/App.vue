@@ -128,16 +128,17 @@ main {
   border-radius: 4px;
 }
 
-#app .modal-footer {
+.modal-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; 
 }
 
-#app .modal-footer button {
+.modal-footer button {
   margin-left: 10px;
+  margin-right: 10px; 
 }
 
-#app .modal-footer button[type="submit"] {
+.modal-footer button[type="submit"] {
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -146,11 +147,10 @@ main {
   cursor: pointer;
 }
 
-#app .modal-footer button[type="button"] {
-  background-color: transparent;
-  color: #333;
+.modal-footer button[type="button"] {
   border: none;
   padding: 10px 20px;
   cursor: pointer;
 }
+
 </style>
