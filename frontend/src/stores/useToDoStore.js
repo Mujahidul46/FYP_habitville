@@ -17,7 +17,12 @@ export const useToDoStore = defineStore('todo', {
     toDeleteTodo: null,
   }),
   getters: {
-  },
+    sortedAccomplishedTodos: (state) => {
+      return [...state.accomplishedTodos].sort((a, b) => {
+        return new Date(b.completed_at) - new Date(a.completed_at);
+      });
+    }
+    },
   actions: {
     async fetchCSRFToken() {
         try {

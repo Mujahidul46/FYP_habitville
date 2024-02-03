@@ -17,7 +17,7 @@
       <div v-if="todoStore.currentView === 'todos' && !todoStore.todos.length" class="empty-todo-list">
         <div class="empty-todo-content">
           <h3 class="emptyTitle">You have no To Do's</h3>
-          <p>These are one-off tasks. For example, "book an appointment" or "email Rajakumar Patel".</p>
+          <p>These are one-off tasks. For example, "book an appointment" or "send an email to Alice".</p>
         </div>
       </div>
 
@@ -41,7 +41,7 @@
             <p>Complete tasks to see them in this list.</p>
           </div>
         </li>
-        <li v-for="todo in todoStore.accomplishedTodos" :key="todo.id" class="todo-item">
+        <li v-for="todo in todoStore.sortedAccomplishedTodos" :key="todo.id" class="todo-item">
           <div class="todo-content">
             <h3>{{ todo.title }}</h3>
             <p>{{ todo.notes }}</p>
