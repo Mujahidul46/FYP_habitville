@@ -20,75 +20,44 @@
   </div>
 </template>
   
-<script lang="ts">
-  import { defineComponent, ref } from "vue";
-  
-  interface UserData {
-    username: string;
-    email: string;
-    goals: string;
-  }
-  
-  export default defineComponent({
-    setup() {
-      const user = ref<UserData>({
-        username: "",
-        email: "",
-        goals: "",
+<script>
+import { defineComponent, ref, watch, onMounted } from "vue";
+import { useProfileStore } from "@/stores/useProfileStore";
+
+export default defineComponent({
+  setup() {
+    const profileStore = useProfileStore();
+    const localUser = ref({ ...profileStore.user });
+    const statusMessage = ref(profileStore.statusMessage);
+
+    watch(() => profileStore.statusMessage, (newMessage) => {
+      statusMessage.value = newMessage;
+    });
+
+    watch(localUser, (newUser) => {
+      profileStore.user = newUser;
+    }, { deep: true });
+
+    const updateProfile = async () => {
+      await profileStore.updateProfile(localUser.value);
+    };
+
+    onMounted(() => {
+      localUser.value = { ...profileStore.user };
+      profileStore.fetchUserProfile().then(() => {
+        localUser.value = { ...profileStore.user };
       });
+    });
 
-      const statusMessage = ref("");
-  
-      const fetchUserProfile = async () => {
-        try {
-          const response = await fetch("http://localhost:8000/user/", {
-            method: "GET",
-            credentials: "include",
-          });
-  
-          if (response.ok) {
-            const userData = (await response.json()) as UserData;
-            user.value = userData;
-          } else {
-            console.error(
-              "Failed to fetch user data:",
-              response.status,
-              response.statusText
-            );
-          }
-        } catch (error) {
-          console.error("Error during fetch:", error);
-        }
-      };
-  
-      const updateProfile = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/user/update/", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user.value),
-          credentials: "include",
-        });
-
-        if (response.ok) {
-            statusMessage.value = "Profile updated successfully"; 
-          } else {
-            statusMessage.value = "Failed to update profile. Please try again."; 
-          }
-        } catch (error) {
-          statusMessage.value = "An error occurred while updating the profile."; 
-        }
-      };
-
-    fetchUserProfile();
-
-    return { user, updateProfile, statusMessage };
+    return {
+      user: localUser,
+      updateProfile,
+      statusMessage,
+    };
   },
 });
 </script>
-  
+ 
 <style scoped>
 .profile-page input,
 .profile-page textarea {
