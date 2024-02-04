@@ -59,7 +59,6 @@ export const useProfileStore = defineStore('profile', {
         return false; 
       }
     },
-    
       
     }
 });
