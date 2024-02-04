@@ -6,13 +6,21 @@
         <ul class="navbar-nav ml-auto">
           <!-- Habit Tracker button -->
           <li class="nav-item">
-            <router-link to="/" class="btn btn-outline-light m-2">
+            <router-link
+              to="/"
+              class="btn btn-outline-light m-2"
+              active-class="nav-link-active"
+            >
               Habit Tracker
             </router-link>
           </li>
           <!-- Profile Page button -->
           <li class="nav-item">
-            <router-link to="/profile" class="btn btn-outline-light m-2">
+            <router-link
+              to="/profile"
+              class="btn btn-outline-light m-2"
+              active-class="nav-link-active"
+            >
               Profile Page
             </router-link>
           </li>
@@ -212,4 +220,16 @@ main {
     padding: 10px 20px;
     cursor: pointer;
 }
+
+.navbar-custom .navbar-nav .nav-item .nav-link-active {
+  box-shadow: 0 0 20px 0 rgba(1, 163, 104, 0.7); 
+  transition: all 0.3s ease; 
+  transform: translateY(-2px); 
+  background-image: linear-gradient(45deg, #025301, rgb(3, 160, 97)); 
+  color: #ffffff; 
+  border-radius: 4px; 
+  padding: .375rem .75rem; 
+  border: 1px solid #027d40; 
+}
+
 </style>
