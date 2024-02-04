@@ -6,19 +6,13 @@
         <ul class="navbar-nav ml-auto">
           <!-- Habit Tracker button -->
           <li class="nav-item">
-            <router-link
-              to="/"
-              class="btn btn-outline-light m-2"
-            >
+            <router-link to="/" class="btn btn-outline-light m-2">
               Habit Tracker
             </router-link>
           </li>
           <!-- Profile Page button -->
           <li class="nav-item">
-            <router-link
-              to="/profile"
-              class="btn btn-outline-light m-2"
-            >
+            <router-link to="/profile" class="btn btn-outline-light m-2">
               Profile Page
             </router-link>
           </li>
@@ -34,6 +28,13 @@
           </li>
         </ul>
       </div>
+      <!-- Profile icon -->
+      <div class="navbar-account">
+        <span class="navbar-text">
+          <i class="fas fa-user"></i>
+          <span class="username">{{ userProfile.username }}</span>
+        </span>
+      </div>
     </div>
   </nav>
   
@@ -42,28 +43,50 @@
   </main>
 </template>
 
-
-<script lang="ts">
-import { defineComponent } from "vue";
+<script>
+import { defineComponent, onMounted, ref, watch } from "vue";
 import { RouterView } from "vue-router";
+import { useProfileStore } from "@/stores/useProfileStore";
 
 export default defineComponent({
-    components: { RouterView },
+  components: { RouterView },
 
-    methods: {
-      logout() {
-        window.location.href = "http://localhost:8000/logout/";
+  setup() {
+    const profileStore = useProfileStore();
+    const userProfile = ref(profileStore.user);
+
+    onMounted(async () => {
+      await profileStore.fetchUserProfile();
+    });
+
+    watch(
+      () => profileStore.user,
+      (newUser) => {
+        userProfile.value = newUser;
       },
+      { immediate: true }
+    );
+
+    return {
+      userProfile,
+    };
+  },
+
+  methods: {
+    logout() {
+      window.location.href = "http://localhost:8000/logout/";
     },
+  },
 });
 </script>
+
 
 <style>
 body, html {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #65dc6f; 
+    background-color: #65dc6f;
     color: #333;
 }
 
@@ -71,11 +94,15 @@ body, html {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #65dc6f; 
+    background-color: #65dc6f;
 }
 
 .navbar-custom {
-    background-color: #4CAF50; 
+    background-color: #4CAF50;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 1rem;
 }
 
 .navbar-custom .navbar-brand,
@@ -83,74 +110,106 @@ body, html {
 .navbar-custom .navbar-nav .nav-link,
 .navbar-custom .navbar-nav .nav-link:hover {
     color: white;
-    cursor: pointer; 
+    cursor: pointer;
 }
 
+.navbar-custom .navbar-collapse {
+    display: flex;
+    justify-content: start; 
+}
+
+.navbar-custom .navbar-nav {
+    display: flex;
+    align-items: center;
+    margin-right: auto; 
+}
+
+.navbar-custom .navbar-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-custom .fas.fa-user {
+    font-size: 1.2rem;
+}
+
+.navbar-custom .username {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.navbar-custom .navbar-account {
+    display: flex;
+    align-items: center;
+    margin-left: auto; 
+}
+
+
 main {
-    flex: 1; 
-    background-color: #65dc6f; 
+    flex: 1;
+    background-color: #65dc6f;
 }
 
 .footer-custom {
-    background-color: #4CAF50; 
+    background-color: #4CAF50;
     color: white;
 }
 
 #app .modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8); 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
 #app .modal-content {
-  background-color: #FFF;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-  width: auto; 
-  max-width: 500px; 
-  z-index: 10000; 
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    width: auto;
+    max-width: 500px;
+    z-index: 10000;
 }
 
 #app .modal-content input,
 #app .modal-content textarea {
-  width: calc(100% - 20px); 
-  padding: 10px;
-  margin-bottom: 15px; 
-  border: 1px solid #ccc;
-  border-radius: 4px;
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .modal-footer {
-  display: flex;
-  justify-content: space-between; 
+    display: flex;
+    justify-content: space-between;
 }
 
 .modal-footer button {
-  margin-left: 10px;
-  margin-right: 10px; 
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .modal-footer button[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .modal-footer button[type="button"] {
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
 }
-
 </style>
