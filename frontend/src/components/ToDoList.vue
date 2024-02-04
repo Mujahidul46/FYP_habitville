@@ -172,20 +172,25 @@ export default {
     margin: auto;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     padding: 1em;
-    background-color: #e0e0e0;
+    background-color: #bcdbba;
     position: relative;
     }
 
-    .add-todo-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        cursor: pointer;
-        padding: 0.5em;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-    }
+  .habit-tracker .todo-list-container .add-todo-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    padding: 0.5em;
+    background-color: #8bc34a; 
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease; 
+  }
+
+  .habit-tracker .todo-list-container .add-todo-btn:hover {
+    background-color: #add681; 
+  }
 
     .todo-item {
       transition: border-color 0.3s ease;
@@ -250,7 +255,7 @@ export default {
       text-align: center;
       margin-top: 10em; 
       color: #a8a4a4;
-      background-color: #e0e0e0;
+      background-color: #bcdbba;
     }
 
     .empty-todo-content h3 {
@@ -261,14 +266,27 @@ export default {
       font-style: italic;
     }
 
-    .view-toggle {
+    .habit-tracker .todo-list-container .view-toggle {
       margin-right: 10px;
-      background-color: #e0e0e0; 
+      background-color: #8bc34a; 
+      padding: 10px 20px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      transition: background-color 0.3s, border-bottom 0.3s, color 0.3s;
     }
 
-    .view-toggle.active {
-      background-color: #9540df; 
-      color: white; 
+    .habit-tracker .todo-list-container .view-toggle.active {
+      background-color: #bfe593; 
+      color: #33691e; 
+      font-weight: bold; 
+      border-bottom: 4px solid #7cb342; 
+      border-radius: 4px 4px 0 0;
+      margin-bottom: -4px;
+    }
+
+    .habit-tracker .todo-list-container .view-toggle:hover {
+      background-color: #add681; 
     }
 
     .emptyTitle {
