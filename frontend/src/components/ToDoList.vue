@@ -17,7 +17,7 @@
         <div v-if="todoStore.currentView === 'todos' && !todoStore.todos.length" class="empty-todo-list">
           <div class="empty-todo-content">
             <h3 class="emptyTitle">You have no To Do's</h3>
-            <p>These are one-off tasks. For example, "book an appointment" or "send an email to Alice".</p>
+            <p>These are one-off tasks. For example, "book an appointment" or "Email Alice".</p>
           </div>
         </div>
   
@@ -35,12 +35,17 @@
         </ul>
   
         <ul v-if="todoStore.currentView === 'accomplished'" class="accomplished">
+          <div v-if="todoStore.accomplishedTodos.length" class="accomplished-message">
+            <h3>Here are your accomplished tasks - great work!</h3>
+          </div>
+
           <li v-if="!todoStore.accomplishedTodos.length" class="empty-todo-list">
             <div class="empty-todo-content">
               <h3 class="emptyTitle">Your accomplished tasks will appear here!</h3>
               <p>Complete tasks to see them in this list.</p>
             </div>
           </li>
+
           <li v-for="todo in todoStore.sortedAccomplishedTodos" :key="todo.id" class="todo-item">
             <div class="todo-content">
               <h3>{{ todo.title }}</h3>
@@ -49,6 +54,7 @@
             </div>
           </li>
         </ul>
+
       </div>
   
       <div v-if="todoStore.showForm" class="modal-backdrop">
@@ -161,8 +167,7 @@ export default {
 
     .todo-list-container {
     width: 500px;
-    height: 600px;
-    overflow: auto;
+    min-height: 600px; 
     border: 2px solid #4CAF50;
     margin: auto;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -278,4 +283,21 @@ export default {
     .modal-footer button[type="button"] {
       cursor: pointer; 
     }
+
+    .accomplished-message {
+      text-align: center; 
+      padding: 1em; 
+      background-color: rgb(87, 238, 107); 
+      color: #5a5a5a; 
+      border-radius: 5px; 
+      margin: 1em 0; 
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+      font-weight: bold; 
+    }
+
+    .accomplished-message h3 {
+      margin: 0; 
+      font-size: 1.25em; 
+    }
+
 </style>
