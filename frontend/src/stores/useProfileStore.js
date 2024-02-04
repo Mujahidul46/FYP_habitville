@@ -35,27 +35,31 @@ export const useProfileStore = defineStore('profile', {
       }
     },
     async updateProfile(userData) {
-        try {
-          const response = await fetch("http://localhost:8000/user/update/", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userData),
-            credentials: "include",
-          });
+      try {
+        const response = await fetch("http://localhost:8000/user/update/", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+          credentials: "include",
+        });
     
-          if (response.ok) {
-            const data = await response.json();
-            this.user = data; 
-            this.statusMessage = "Profile updated successfully"; 
-          } else {
-            this.statusMessage = "Failed to update profile. Please try again.";
-          }
-        } catch (error) {
-          this.statusMessage = "An error occurred while updating the profile.";
+        if (response.ok) {
+          const data = await response.json();
+          this.user = data; 
+          this.statusMessage = "Profile updated successfully"; 
+          return true; 
+        } else {
+          this.statusMessage = "Failed to update profile. Please try again.";
+          return false; 
         }
-      },
+      } catch (error) {
+        this.statusMessage = "An error occurred while updating the profile.";
+        return false; 
+      }
+    },
+    
       
     }
 });

@@ -21,32 +21,27 @@
 </template>
   
 <script>
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useProfileStore } from "@/stores/useProfileStore";
 
 export default defineComponent({
   setup() {
     const profileStore = useProfileStore();
     const localUser = ref({ ...profileStore.user });
-    const statusMessage = ref(profileStore.statusMessage);
-
-    watch(() => profileStore.statusMessage, (newMessage) => {
-      statusMessage.value = newMessage;
-    });
-
-    watch(localUser, (newUser) => {
-      profileStore.user = newUser;
-    }, { deep: true });
+    const statusMessage = ref("");
 
     const updateProfile = async () => {
-      await profileStore.updateProfile(localUser.value);
+      const updateResult = await profileStore.updateProfile(localUser.value);
+      if (updateResult) {
+        profileStore.user = { ...localUser.value };
+        statusMessage.value = "Profile updated successfully!";
+      } else {
+        statusMessage.value = "Failed to update profile.";
+      }
     };
 
     onMounted(() => {
       localUser.value = { ...profileStore.user };
-      profileStore.fetchUserProfile().then(() => {
-        localUser.value = { ...profileStore.user };
-      });
     });
 
     return {
@@ -57,6 +52,7 @@ export default defineComponent({
   },
 });
 </script>
+
  
 <style scoped>
 .profile-page input,
