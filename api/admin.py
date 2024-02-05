@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ToDo
+from .models import User, ToDo, Habit
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -23,6 +23,20 @@ class ToDoAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(user=request.user)
+    
+
+class HabitAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'date', 'completed')
+    list_filter = ('date', 'user', 'completed')
+    search_fields = ('title', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
 
 admin.site.register(User, UserAdmin)
 admin.site.register(ToDo, ToDoAdmin)
+admin.site.register(Habit, HabitAdmin)

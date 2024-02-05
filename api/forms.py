@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import ToDo
+from .models import ToDo, Habit
 
 User = get_user_model()
 
@@ -32,3 +32,17 @@ class ToDoForm(forms.ModelForm):
         super(ToDoForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Title'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes'})
+
+class HabitForm(forms.ModelForm):
+    title = forms.CharField(required=True, max_length=255)
+    notes = forms.CharField(required=False, widget=forms.Textarea)
+
+    class Meta:
+        model = Habit
+        fields = ('title', 'notes')
+
+    def __init__(self, *args, **kwargs):
+        super(HabitForm, self).__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Title of the habit'})
+        self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Optional notes...'})
+

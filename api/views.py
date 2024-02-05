@@ -3,13 +3,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm, ToDoForm
+from .forms import CustomUserCreationForm, ToDoForm, HabitForm
 from django.contrib.auth.decorators import login_required
-from .models import User, ToDo
+from .models import User, ToDo, Habit
 import json
 from django.middleware.csrf import get_token 
 from django.forms.models import model_to_dict
 from django.utils.timezone import now
+from django.utils import timezone
+from datetime import timedelta
+from django.utils.datastructures import MultiValueDictKeyError
 
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
@@ -179,3 +182,55 @@ def list_completed_todos_view(request: HttpRequest) -> HttpResponse:
     completed_todos = ToDo.objects.filter(user=request.user, completed=True)
     todos_data = [model_to_dict(todo, fields=['id', 'title', 'notes', 'created_at', 'updated_at', 'completed', 'completed_at']) for todo in completed_todos]
     return JsonResponse(todos_data, safe=False, status=200)
+
+@csrf_exempt
+@login_required
+def create_habit_view(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = HabitForm(data)
+        if form.is_valid():
+            habit = form.save(commit=False)
+            habit.user = request.user
+            habit.date = timezone.now().date()  
+            habit.save()
+            habit_data = model_to_dict(habit)
+            return JsonResponse(habit_data, status=201)
+        else:
+            return JsonResponse(form.errors, status=400)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+@csrf_exempt
+@login_required
+def list_habits_view(request: HttpRequest) -> HttpResponse:
+    start_date = request.GET.get('start_date', (timezone.now() - timedelta(days=3)).date())
+    end_date = request.GET.get('end_date', timezone.now().date())
+    
+    if isinstance(start_date, str):
+        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
+    if isinstance(end_date, str):
+        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    habits = Habit.objects.filter(user=request.user, date__range=[start_date, end_date]).order_by('-date')
+    habits_data = [habit.to_dict() for habit in habits]
+    return JsonResponse(habits_data, safe=False)
+
+
+@csrf_exempt
+@login_required
+def update_habit_status_view(request: HttpRequest, habit_id: int) -> HttpResponse:
+    habit = get_object_or_404(Habit, pk=habit_id, user=request.user)
+
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        completed = data.get('completed')
+        if completed is not None:
+            habit.completed = completed
+            habit.save(update_fields=['completed'])
+            habit_data = habit.to_dict()
+            return JsonResponse(habit_data, status=200)
+        else:
+            return JsonResponse({'error': 'Invalid habit status update'}, status=400)
+    else:
+        return HttpResponseNotAllowed(['PUT'])

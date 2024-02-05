@@ -16,4 +16,7 @@ urlpatterns = [
     path('delete-todo/<int:pk>/', views.delete_todo_view, name='delete_todo'),
     path('mark-completed/<int:pk>/', views.complete_todo_view, name='mark_todo_completed'),
     path('list-completed/', views.list_completed_todos_view, name='list_completed_todos'),
+    path('habits/create/', views.create_habit_view, name='create_habit'),
+    path('habits/', views.list_habits_view, name='list_habits'),
+    path('habits/update/<int:habit_id>/', views.update_habit_status_view, name='update_habit_status'),
 ]
