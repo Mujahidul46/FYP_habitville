@@ -3,7 +3,7 @@
     <div class="habit-list-container">
       <button class="add-habit-btn" @click="showAddHabitModal">Add Habit</button>
       <div v-if="showHabitForm" class="modal-backdrop">
-        <!-- Habit Form -->
+        <!-- Habit Form form -->
         <div class="modal-content">
           <h2 class="form-title">Create Habit</h2>
           <form @submit.prevent="submitHabit">
