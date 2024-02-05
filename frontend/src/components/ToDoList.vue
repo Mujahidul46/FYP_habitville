@@ -1,5 +1,5 @@
 <template>
-    <div class="habit-tracker">
+    <div class="to-do">
       <div class="todo-list-container">
         <button
           class="view-toggle"
@@ -121,7 +121,7 @@ export default {
 </script>
 
 <style scoped>
-    .habit-tracker form {
+    .to-do form {
     margin-bottom: 1em;
     }
 
@@ -131,35 +131,35 @@ export default {
         margin-bottom: 1rem; 
     }
 
-    .habit-tracker input,
-    .habit-tracker textarea {
+    .to-do input,
+    .to-do textarea {
     margin-bottom: 0.5em;
     padding: 0.5em;
     border: 1px solid #ccc;
     width: 100%; 
     }
 
-    .habit-tracker button {
+    .to-do button {
     padding: 0.5em;
     background-color: #4CAF50;
     color: white;
     border: none;
     }
 
-    .habit-tracker ul {
+    .to-do ul {
     list-style: none;
     padding: 0;
     }
 
-    .habit-tracker li {
+    .to-do li {
     margin-bottom: 1em;
     padding: 1em;
     border-radius: 5px;
     overflow: hidden; 
     }
 
-    .habit-tracker h3,
-    .habit-tracker p {
+    .to-do h3,
+    .to-do p {
     word-wrap: break-word; 
     overflow-wrap: break-word; 
     margin: 0; 
@@ -176,7 +176,7 @@ export default {
     position: relative;
     }
 
-  .habit-tracker .todo-list-container .add-todo-btn {
+  .to-do .todo-list-container .add-todo-btn {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -188,7 +188,7 @@ export default {
     transition: background-color 0.3s ease; 
   }
 
-  .habit-tracker .todo-list-container .add-todo-btn:hover {
+  .to-do .todo-list-container .add-todo-btn:hover {
     background-color: #add681; 
   }
 
@@ -266,7 +266,7 @@ export default {
       font-style: italic;
     }
 
-    .habit-tracker .todo-list-container .view-toggle {
+    .to-do .todo-list-container .view-toggle {
       margin-right: 10px;
       background-color: #8bc34a; 
       padding: 10px 20px;
@@ -276,7 +276,7 @@ export default {
       transition: background-color 0.3s, border-bottom 0.3s, color 0.3s;
     }
 
-    .habit-tracker .todo-list-container .view-toggle.active {
+    .to-do .todo-list-container .view-toggle.active {
       background-color: #bfe593; 
       color: #33691e; 
       font-weight: bold; 
@@ -285,7 +285,7 @@ export default {
       margin-bottom: -4px;
     }
 
-    .habit-tracker .todo-list-container .view-toggle:hover {
+    .to-do .todo-list-container .view-toggle:hover {
       background-color: #add681; 
     }
 

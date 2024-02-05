@@ -1,9 +1,10 @@
 <template>
-  <div class="dashboard">
-    <ToDoList />
+  <div class="dashboard-container">
     <DailyHabits />
+    <ToDoList />
   </div>
 </template>
+
 
 <script>
 import { onMounted } from 'vue';
@@ -35,3 +36,18 @@ export default {
   },
 };
 </script>
+
+<style>
+.dashboard-container {
+  display: flex; 
+  justify-content: center; 
+  align-items: flex-start; 
+  gap: 2em; 
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column; 
+  }
+}
+</style>
