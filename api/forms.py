@@ -33,16 +33,3 @@ class ToDoForm(forms.ModelForm):
         self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Title'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes'})
 
-class HabitForm(forms.ModelForm):
-    title = forms.CharField(required=True, max_length=255)
-    notes = forms.CharField(required=False, widget=forms.Textarea)
-
-    class Meta:
-        model = Habit
-        fields = ('title', 'notes')
-
-    def __init__(self, *args, **kwargs):
-        super(HabitForm, self).__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Title of the habit'})
-        self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Optional notes...'})
-

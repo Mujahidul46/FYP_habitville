@@ -56,26 +56,25 @@ class Habit(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits')
     title = models.CharField(max_length=255)
     notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    completed = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.title
+
+class HabitCompletion(models.Model):
+    habit = models.ForeignKey(Habit, on_delete=models.CASCADE, related_name='completions')
     date = models.DateField()
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('habit', 'date')
 
     def __str__(self):
-        return f"{self.title} ({'completed' if self.completed else 'not completed'})"
+        return f"{self.habit.title} - {self.date} - {'Completed' if self.completed else 'Not Completed'}"
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'user': self.user.username,
-            'title': self.title,
-            'notes': self.notes,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat(),
-            'completed': self.completed,
-            'date': self.date.isoformat(),
+            'habit_id': self.habit.id,
+            'date': self.date,
+            'completed': self.completed
         }
-    
-    def save(self, *args, **kwargs):
-        super(Habit, self).save(*args, **kwargs)
 

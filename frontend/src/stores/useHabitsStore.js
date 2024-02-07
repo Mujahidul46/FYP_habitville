@@ -3,15 +3,15 @@ import { defineStore } from 'pinia';
 export const useHabitsStore = defineStore('habits', {
   state: () => ({
     csrfToken: '',
+    habits: [],
     newHabit: {
       title: '',
       notes: ''
     },
-    habits: [],
-    currentView: 'habits',
-    showHabitForm: false,
     editingHabit: null,
   }),
+  getters: {
+  },
   actions: {
     async fetchCSRFToken() {
       try {
@@ -26,12 +26,15 @@ export const useHabitsStore = defineStore('habits', {
     },
     async fetchHabits() {
       try {
-        const response = await fetch("http://localhost:8000/habits/", {
+        const response = await fetch("http://localhost:8000/list-habits/", {
           credentials: 'include'
         });
         if (response.ok) {
-          const fetchedHabits = await response.json();
-          this.habits = fetchedHabits;
+          let fetchedHabits = await response.json();
+          this.habits = fetchedHabits.map(habit => ({
+            ...habit,
+            completions: habit.completions || []
+          }));
         } else {
           console.error('Failed to fetch habits:', await response.text());
         }
@@ -39,9 +42,10 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error fetching habits:', error);
       }
     },
-    async addHabit() {
+    async createHabit() {
+      console.log('Creating habit with:', this.newHabit);
       try {
-        const response = await fetch("http://localhost:8000/habits/create/", {
+        const response = await fetch("http://localhost:8000/create-habit/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -52,44 +56,53 @@ export const useHabitsStore = defineStore('habits', {
         });
         if (response.ok) {
           const createdHabit = await response.json();
+          createdHabit.completions = []; 
           this.habits.push(createdHabit);
-          this.resetForm(); 
-          this.showHabitForm = false;
+          this.resetNewHabit(); 
         } else {
-          console.error('Failed to add habit:', await response.text());
+          console.error('Failed to create habit:', await response.text());
         }
       } catch (error) {
-        console.error('Error adding habit:', error);
+        console.error('Error creating habit:', error);
       }
     },
-    async updateHabitStatus(habit) {
+    
+    resetNewHabit() {
+      this.$patch({
+        newHabit: {
+          title: '',
+          notes: ''
+        }
+      });
+    },
+    async updateHabitCompletion(habitId, date, completed) {
       try {
-        const response = await fetch(`http://localhost:8000/habits/update/${habit.id}/`, {
+        const response = await fetch(`http://localhost:8000/update-habit-completion/${habitId}/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': this.csrfToken,
           },
-          body: JSON.stringify({ completed: !habit.completed }),
+          body: JSON.stringify({ date, completed }),
           credentials: 'include',
         });
         if (response.ok) {
-          const updatedHabit = await response.json();
-          const index = this.habits.findIndex(h => h.id === habit.id);
-          if (index !== -1) {
-            this.habits[index] = updatedHabit;
+          let habit = this.habits.find(h => h.id === habitId);
+          if (habit) {
+            habit.completions = habit.completions || []; 
+            let completion = habit.completions.find(c => c.date === date);
+            if (completion) {
+              completion.completed = completed;
+            } else {
+              habit.completions.push({ date, completed });
+            }
           }
         } else {
-          console.error('Failed to update habit status:', await response.text());
+          console.error('Failed to update habit completion:', await response.text());
         }
       } catch (error) {
-        console.error('Error updating habit status:', error);
+        console.error('Error updating habit completion:', error);
       }
     },
-    resetForm() {
-      this.newHabit.title = '';
-      this.newHabit.notes = '';
-      this.editingHabit = null;
-    },
-  }
+  },
 });
