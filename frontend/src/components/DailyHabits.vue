@@ -1,7 +1,7 @@
 <template>
   <div class="habit-tracker-container">
     
-    <!-- Go forward or back 4 days, and Add habit button -->
+    <!-- Go forward or back 4 days, and Add habit button. test -->
     <div class="controls">
       <button class="nav-arrow" @click="changeDate(-4)" :disabled="isOldestDate">←</button>
       <button class="nav-arrow" @click="changeDate(4)" :disabled="isMostRecentDate">→</button>
