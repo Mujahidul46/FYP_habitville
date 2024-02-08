@@ -8,21 +8,17 @@
     </div>
 
     <!-- Modal that shows after "Add Habit" clicked -->
-    <div v-if="showAddHabitModal" class="modal">
-      <div class="modal-backdrop" @click="closeModal"></div>
+    <div v-if="showAddHabitModal" class="modal-backdrop" @click.self="closeModal">
       <div class="modal-content">
+        <h2 class="form-title">Create Habit</h2>
         <form @submit.prevent="createHabit">
-          <div class="form-group">
-            <label for="title">Title*:</label>
-            <input type="text" id="title" v-model="newHabit.title" required>
-          </div>
-          <div class="form-group">
-            <label for="notes">Notes:</label>
-            <textarea id="notes" v-model="newHabit.notes"></textarea>
-          </div>
+          <label for="titleInput">Title<span class="required-asterisk">*</span></label>
+          <input id="titleInput" v-model="newHabit.title" placeholder="Add a title" required>
+          <label for="notesInput">Notes</label>
+          <textarea id="notesInput" v-model="newHabit.notes" placeholder="Add notes"></textarea>
           <div class="modal-footer">
             <button type="button" @click="closeModal">Cancel</button>
-            <button type="submit">Submit</button>
+            <button type="submit">Create</button>
           </div>
         </form>
       </div>
@@ -219,70 +215,6 @@ export default {
 .habit-cell button {
   background-color: transparent;
   border: none;
-  cursor: pointer;
-}
-
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; 
-}
-
-.modal-backdrop {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.8); 
-}
-
-.modal-content {
-  background-color: #FFF;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-  width: auto;
-  max-width: 500px;
-  z-index: 10000; 
-}
-
-.modal-content input,
-.modal-content textarea {
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: space-between;
-}
-
-.modal-footer button {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-.modal-footer button[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.modal-footer button[type="button"] {
-  border: none;
-  padding: 10px 20px;
   cursor: pointer;
 }
 
