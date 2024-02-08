@@ -36,7 +36,8 @@
         <!-- No habit header -->
         <div class="date-cell-placeholder"></div>
         <!-- Date cells -->
-        <div class="date-cell" v-for="date in displayedDates" :key="date">{{ formatDate(date) }}</div>
+        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
+
       </div>
 
       <!-- Rows for habits and tick/cross status -->
@@ -98,8 +99,11 @@ export default {
     }
 
     function formatDate(date) {
-      return format(date, 'E dd'); // E.g. Wed 07
+      const dayOfWeek = format(date, 'E'); // E.g. Wed
+      const dayOfMonth = format(date, 'dd'); // E.g. 07
+      return `<span class="day-of-week">${dayOfWeek}</span><span class="day-of-month">${dayOfMonth}</span>`;
     }
+
 
     function toggleHabitCompletion(habit, date) { // 'X' -> tick or vice versa
       habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date));
@@ -188,18 +192,30 @@ export default {
   text-align: center;
   padding: 0.5em;
   display: flex;
+  flex-direction: column; 
   align-items: center;
   justify-content: center;
+  min-width: 60px; 
 }
 
 .date-cell {
-  align-self: center;
-}
-
-.habit-cell:not(:last-child),
-.date-cell:not(:last-child) {
   border-right: 1px solid #ccc;
 }
+
+.date-cell:last-child,
+.habit-cell:last-child {
+  border-right: none;
+}
+
+.day-of-week,
+.day-of-month {
+  display: block; 
+}
+
+.habit-cell:not(:last-child) {
+  border-right: 1px solid #ccc; 
+}
+
 
 .habit-name {
   grid-column: 1 / 2; 
