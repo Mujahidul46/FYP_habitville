@@ -1,10 +1,9 @@
 <template>
   <div class="habit-tracker-container">
-    
     <!-- Go forward or back 4 days, and "Add Habit" button.  -->
     <div class="controls">
-      <button class="nav-arrow" @click="changeDate(-4)" v-if="!isOldestDate">←</button>
-      <button class="nav-arrow" @click="changeDate(4)" v-if="!isMostRecentDate">→</button>
+      <button class="nav-arrow" @click="changeDate(4)" v-if="!isMostRecentDate">←</button>
+      <button class="nav-arrow" @click="changeDate(-4)" v-if="!isOldestDate">→</button>
       <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
     </div>
 
@@ -37,7 +36,6 @@
         <div class="date-cell-placeholder"></div>
         <!-- Date cells -->
         <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
-
       </div>
 
       <!-- Rows for habits and tick/cross status -->
@@ -53,7 +51,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import { ref, computed, onMounted } from 'vue';
@@ -75,35 +72,33 @@ export default {
       for (let i = 0; i < 4; i++) {
         dates.push(subDays(currentDate.value, i));
       }
-      return dates.reverse();
+      return dates;
     });
 
     const isOldestDate = computed(() => {
-      const oldestDisplayedDate = displayedDates.value[0];
-      const oldestAllowableDate = subDays(new Date(), maxPastDays - 3); 
+      const oldestDisplayedDate = displayedDates.value[displayedDates.value.length - 1];
+      const oldestAllowableDate = subDays(new Date(), maxPastDays); 
       return oldestDisplayedDate.setHours(0, 0, 0, 0) <= oldestAllowableDate.setHours(0, 0, 0, 0);
     });
 
-
     const isMostRecentDate = computed(() => {
-      const mostRecentDisplayedDate = displayedDates.value[displayedDates.value.length - 1];
-      return mostRecentDisplayedDate.setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0);
+      const mostRecentDisplayedDate = displayedDates.value[0];
+      return mostRecentDisplayedDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
     });
 
 
     function changeDate(days) {
       const newDate = addDays(currentDate.value, days);
-      if (newDate <= new Date()) {
+      if (newDate.setHours(0, 0, 0, 0) <= new Date().setHours(0, 0, 0, 0)) {
         currentDate.value = newDate;
       }
     }
 
     function formatDate(date) {
-      const dayOfWeek = format(date, 'E'); // E.g. Wed
-      const dayOfMonth = format(date, 'dd'); // E.g. 07
+      const dayOfWeek = format(date, 'E'); // E.g., Wed
+      const dayOfMonth = format(date, 'd'); // E.g., 7, or 17, no leading 0 for single digit dates
       return `<span class="day-of-week">${dayOfWeek}</span><span class="day-of-month">${dayOfMonth}</span>`;
     }
-
 
     function toggleHabitCompletion(habit, date) { // 'X' -> tick or vice versa
       habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date));
@@ -145,6 +140,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .habit-tracker-container {
   width: 500px; 
@@ -172,8 +168,6 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
-
 
 .habit-grid {
   display: grid;
