@@ -1,10 +1,10 @@
 <template>
   <div class="habit-tracker-container">
     
-    <!-- Go forward or back 4 days, and Add habit button. test -->
+    <!-- Go forward or back 4 days, and "Add Habit" button.  -->
     <div class="controls">
-      <button class="nav-arrow" @click="changeDate(-4)" :disabled="isOldestDate">←</button>
-      <button class="nav-arrow" @click="changeDate(4)" :disabled="isMostRecentDate">→</button>
+      <button class="nav-arrow" @click="changeDate(-4)" v-if="!isOldestDate">←</button>
+      <button class="nav-arrow" @click="changeDate(4)" v-if="!isMostRecentDate">→</button>
       <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
     </div>
 
@@ -77,16 +77,23 @@ export default {
       return dates.reverse();
     });
 
-    const isOldestDate = computed(() => { // TO DO : fix this so we cant see 4 days into future
-      const oldestDate = subDays(new Date(), maxPastDays);
-      return displayedDates.value[0] <= oldestDate;
+    const isOldestDate = computed(() => {
+      const oldestDisplayedDate = displayedDates.value[0];
+      const oldestAllowableDate = subDays(new Date(), maxPastDays - 3); 
+      return oldestDisplayedDate.setHours(0, 0, 0, 0) <= oldestAllowableDate.setHours(0, 0, 0, 0);
     });
 
-    const isMostRecentDate = computed(() => currentDate.value >= new Date());
 
-    function changeDate(days) { // changes current date
-      if ((days < 0 && !isOldestDate.value) || (days > 0 && !isMostRecentDate.value)) {
-        currentDate.value = addDays(currentDate.value, days);
+    const isMostRecentDate = computed(() => {
+      const mostRecentDisplayedDate = displayedDates.value[displayedDates.value.length - 1];
+      return mostRecentDisplayedDate.setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0);
+    });
+
+
+    function changeDate(days) {
+      const newDate = addDays(currentDate.value, days);
+      if (newDate <= new Date()) {
+        currentDate.value = newDate;
       }
     }
 
@@ -134,7 +141,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .habit-tracker-container {
   width: 500px; 
@@ -162,6 +168,8 @@ export default {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
+
 
 .habit-grid {
   display: grid;
