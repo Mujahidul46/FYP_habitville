@@ -104,5 +104,36 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error updating habit completion:', error);
       }
     },
+
+    async updateHabit(habitId, updatedHabitData) {
+      console.log(`Updating habit id ${habitId} with:`, updatedHabitData);
+      try {
+        const response = await fetch(`http://localhost:8000/update-habit/${habitId}/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.csrfToken,
+          },
+          body: JSON.stringify(updatedHabitData),
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const updatedHabit = await response.json();
+          const habitIndex = this.habits.findIndex(h => h.id === habitId);
+          if (habitIndex !== -1) {
+            this.habits[habitIndex] = { ...this.habits[habitIndex], ...updatedHabit };
+          }
+        } else {
+          console.error('Failed to update habit:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error updating habit:', error);
+      }
+    },
+    editHabit(habit) {
+      this.editingHabit = { ...habit };
+    },
+
+
   },
 });

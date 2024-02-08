@@ -1,19 +1,19 @@
 <template>
   <div class="habit-tracker-container">
     
-    <!-- "Add Habit" button placed here to appear above the dates -->
     <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
 
-    <!-- arrows on the sides of the dates -->
+    <!-- Date Navigation -->
     <div class="date-navigation">
+      <!-- Left Arrow -->
       <button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>
+      <!-- Date Header -->
       <div class="date-header">
-        <!-- No habit header -->
-        <div class="date-cell-placeholder"></div>
-        <!-- Date cells -->
+        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
         <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
-        <div class="date-cell-placeholder"></div> 
+        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
       </div>
+      <!-- Right Arrow -->
       <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
@@ -38,8 +38,7 @@
     <div class="habit-grid">
       <!-- Rows for habits and tick/cross status -->
       <div v-for="habit in habits" :key="habit.id" class="habit-row">
-        <div class="habit-name">{{ habit.title }}</div>
-        <!-- tick/cross cells -->
+        <div class="habit-name" @click="openEditHabitModal(habit)">{{ habit.title }}</div>
         <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
           <button @click="toggleHabitCompletion(habit, date)">
             {{ getHabitCompletionStatus(habit, date) ? '✓' : '✕' }}
@@ -47,8 +46,25 @@
         </div>
       </div>
     </div>
+    <!-- "Edit Habit" Modal when user clicks on habit name -->
+    <div v-if="showEditHabitModal && editingHabit" class="modal-backdrop">
+      <div class="modal-content">
+        <h2 class="form-title">Edit Habit</h2>
+        <form @submit.prevent="submitHabitEdit">
+          <label for="editTitleInput">Title<span class="required-asterisk">*</span></label>
+          <input id="editTitleInput" v-model="editingHabit.title" placeholder="Edit title" required>
+          <label for="editNotesInput">Notes</label>
+          <textarea id="editNotesInput" v-model="editingHabit.notes" placeholder="Edit notes"></textarea>
+          <div class="modal-footer">
+            <button type="button" @click="closeEditModal">Cancel</button>
+            <button type="submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
+
 
 <script>
 import { ref, computed, onMounted } from 'vue';
@@ -60,10 +76,13 @@ export default {
   setup() {
     const habitsStore = useHabitsStore();
     const showAddHabitModal = ref(false);
+    const showEditHabitModal = ref(false);
     const currentDate = ref(new Date());
     const maxPastDays = 60;
 
     const habits = computed(() => habitsStore.habits);
+
+    const editingHabit = computed(() => habitsStore.editingHabit);
 
     const displayedDates = computed(() => { // array of today and past 3 days
       let dates = [];
@@ -117,6 +136,26 @@ export default {
       habitsStore.resetNewHabit(); 
     }
 
+
+    function openEditHabitModal(habit) {
+      habitsStore.editHabit(habit);
+      showEditHabitModal.value = true;
+    }
+
+
+    function submitHabitEdit() { 
+      if (habitsStore.editingHabit) {
+        const { id, ...updatedHabitData } = habitsStore.editingHabit;
+        habitsStore.updateHabit(id, updatedHabitData);
+        closeEditModal();
+      }
+    }
+
+    function closeEditModal() {
+      showEditHabitModal.value = false;
+      habitsStore.editingHabit = null; 
+    }
+
     onMounted(() => {
       habitsStore.fetchHabits();
     });
@@ -134,6 +173,11 @@ export default {
       toggleHabitCompletion,
       getHabitCompletionStatus,
       createHabit,
+      showEditHabitModal,
+      openEditHabitModal,
+      submitHabitEdit,
+      closeEditModal,
+      editingHabit,
     };
   },
 };
@@ -141,7 +185,7 @@ export default {
 
 <style scoped>
 .habit-tracker-container {
-  width: 550px; 
+  width: 750px; 
   min-height: 600px;
   border: 2px solid #4CAF50;
   margin-right: 20px; 
@@ -211,6 +255,7 @@ export default {
   font-family: 'Helvetica Neue', Arial, sans-serif; 
 }
 
+
 .date-cell:last-child,
 .habit-cell:last-child {
   border-right: none;
@@ -232,6 +277,17 @@ export default {
   hyphens: auto;
   font-weight: bold; 
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; 
+  transition: border-color 0.3s ease; 
+  padding: 10px; 
+  border: 2px solid transparent; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center; 
+}
+
+.habit-name:hover {
+  border-color: #faa404; 
 }
 
 
