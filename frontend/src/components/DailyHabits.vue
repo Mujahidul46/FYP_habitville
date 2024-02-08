@@ -218,4 +218,10 @@ export default {
   cursor: pointer;
 }
 
+.form-title {
+  text-align: center;
+  margin-top: 0; 
+  margin-bottom: 1rem; 
+}
+
 </style>
