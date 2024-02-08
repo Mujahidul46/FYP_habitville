@@ -1,14 +1,24 @@
 <template>
   <div class="habit-tracker-container">
-    <!-- Go forward or back 4 days, and "Add Habit" button.  -->
-    <div class="controls">
-      <button class="nav-arrow" @click="changeDate(4)" v-if="!isMostRecentDate">←</button>
-      <button class="nav-arrow" @click="changeDate(-4)" v-if="!isOldestDate">→</button>
-      <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
+    
+    <!-- "Add Habit" button placed here to appear above the dates -->
+    <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
+
+    <!-- arrows on the sides of the dates -->
+    <div class="date-navigation">
+      <button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>
+      <div class="date-header">
+        <!-- No habit header -->
+        <div class="date-cell-placeholder"></div>
+        <!-- Date cells -->
+        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
+        <div class="date-cell-placeholder"></div> 
+      </div>
+      <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
     <!-- Modal that shows after "Add Habit" clicked -->
-    <div v-if="showAddHabitModal" class="modal-backdrop" @click.self="closeModal">
+    <div v-if="showAddHabitModal" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Create Habit</h2>
         <form @submit.prevent="createHabit">
@@ -26,14 +36,6 @@
 
     <!-- Habit grid display -->
     <div class="habit-grid">
-      <!-- Column headers for dates -->
-      <div class="date-header">
-        <!-- No habit header -->
-        <div class="date-cell-placeholder"></div>
-        <!-- Date cells -->
-        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
-      </div>
-
       <!-- Rows for habits and tick/cross status -->
       <div v-for="habit in habits" :key="habit.id" class="habit-row">
         <div class="habit-name">{{ habit.title }}</div>
@@ -137,10 +139,9 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .habit-tracker-container {
-  width: 500px; 
+  width: 550px; 
   min-height: 600px;
   border: 2px solid #4CAF50;
   margin-right: 20px; 
@@ -150,14 +151,7 @@ export default {
   float: left; 
 }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1em;
-}
-
-.controls .nav-arrow,
-.controls .add-habit-btn {
+.nav-arrow {
   padding: 0.5em;
   background-color: #8bc34a; 
   color: white;
@@ -166,11 +160,37 @@ export default {
   transition: background-color 0.3s ease;
 }
 
+.add-habit-btn {
+  display: block;
+  margin-left: auto;
+  padding: 0.5em;
+  background-color: #8bc34a; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1em;
+}
+
+.date-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1em;
+}
+
+.date-header {
+  display: flex;
+  gap: 0.5em; 
+  flex-grow: 1;
+  justify-content: center;
+}
+
 .habit-grid {
   display: grid;
-  grid-template-columns: 200px repeat(4, 1fr); 
-  gap: 0.5em; 
+  grid-template-columns: repeat(6, 1fr); 
   align-items: center;
+  gap: 0.5em;
 }
 
 .date-header,
@@ -186,11 +206,9 @@ export default {
   flex-direction: column; 
   align-items: center;
   justify-content: center;
-  min-width: 60px; 
-}
-
-.date-cell {
-  border-right: 1px solid #ccc;
+  min-width: 60px;
+  font-weight: bold; 
+  font-family: 'Helvetica Neue', Arial, sans-serif; 
 }
 
 .date-cell:last-child,
@@ -207,11 +225,15 @@ export default {
   border-right: 1px solid #ccc; 
 }
 
-
 .habit-name {
-  grid-column: 1 / 2; 
-  flex: none; 
+  grid-column: 1 / 2;
+  flex: none;
+  word-break: break-word;
+  hyphens: auto;
+  font-weight: bold; 
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; 
 }
+
 
 .habit-cell button {
   background-color: transparent;
@@ -223,6 +245,10 @@ export default {
   text-align: center;
   margin-top: 0; 
   margin-bottom: 1rem; 
+}
+
+.invisible {
+  visibility: hidden; 
 }
 
 </style>
