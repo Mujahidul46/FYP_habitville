@@ -91,10 +91,11 @@ export default {
     }
 
     function formatDate(date) {
-      const dayOfWeek = format(date, 'E'); // E.g., Wed
+      const dayOfWeek = format(date, 'E').toUpperCase(); // e.g., WED, TUE, uppercase days
       const dayOfMonth = format(date, 'd'); // E.g., 7, or 17, no leading 0 for single digit dates
       return `<span class="day-of-week">${dayOfWeek}</span><span class="day-of-month">${dayOfMonth}</span>`;
     }
+
 
     function toggleHabitCompletion(habit, date) { // 'X' -> tick or vice versa
       habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date));
