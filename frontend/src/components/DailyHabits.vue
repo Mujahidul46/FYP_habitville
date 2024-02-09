@@ -34,18 +34,19 @@
       </div>
     </div>
 
-      <!-- Habit grid display -->
+    <!-- Habit grid display -->
     <div v-if="habits.length" class="habit-grid">
       <!-- Rows for habits and tick/cross status -->
       <div v-for="habit in habits" :key="habit.id" class="habit-row">
         <div class="habit-name" @click="openEditHabitModal(habit)">{{ habit.title }}</div>
-          <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
-            <button @click="toggleHabitCompletion(habit, date)">
-              <i v-if="getHabitCompletionStatus(habit, date)" class="fas fa-tree"></i>
-              <i v-else-if="isDateToday(date)" class="fas fa-seedling"></i>
-              <img v-else :src="deadTreeIcon" alt="Dead Tree" class="icon-dead-tree"/>
-            </button>
-          </div>
+        <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
+          <button @click="toggleHabitCompletion(habit, date)" class="habit-button">
+            <!-- Icons for habit status -->
+            <i v-if="getHabitCompletionStatus(habit, date)" class="fas fa-tree"></i>
+            <i v-else-if="isDateToday(date)" class="fas fa-seedling"></i>
+            <img v-else :src="deadTreeIcon" alt="Dead Tree" class="icon-dead-tree"/>
+          </button>
+        </div>
       </div>
     </div>
     <!-- Empty habits message -->
@@ -85,8 +86,6 @@
       </div>
     </div>
   </div>
-
-  
 </template>
 
 <script>
@@ -95,6 +94,7 @@ import { useHabitsStore } from '@/stores/useHabitsStore';
 import { format, subDays, addDays, isToday } from 'date-fns';
 import deadTreeIcon from '@/assets/dead_tree_1.png';
 import complete_habit from '@/assets/sounds/complete_habit.mp3';
+import wateringCanIcon from '@/assets/watering_can_1.png';
 
 export default {
   name: 'DailyHabits',
@@ -251,6 +251,7 @@ export default {
       cancelDelete,
       isDateToday,
       deadTreeIcon,
+      wateringCanIcon,
     };
   },
 };
@@ -258,19 +259,19 @@ export default {
 
 <style scoped>
 .habit-tracker-container {
-  width: 750px; 
+  width: 750px;
   min-height: 600px;
   border: 2px solid #4CAF50;
-  margin-right: 20px; 
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-right: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 1em;
-  background-color: #bcdbba; 
-  float: left; 
+  background-color: #bcdbba;
+  float: left;
 }
 
 .nav-arrow {
   padding: 0.5em;
-  background-color: #8bc34a; 
+  background-color: #8bc34a;
   color: white;
   border: none;
   cursor: pointer;
@@ -281,7 +282,7 @@ export default {
   display: block;
   margin-left: auto;
   padding: 0.5em;
-  background-color: #8bc34a; 
+  background-color: #8bc34a;
   color: white;
   border: none;
   cursor: pointer;
@@ -298,49 +299,46 @@ export default {
 
 .date-header {
   display: flex;
-  gap: 0.5em; 
+  gap: 0.5em;
   flex-grow: 1;
   justify-content: center;
 }
 
 .habit-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); 
+  grid-template-columns: repeat(6, 1fr);
   align-items: center;
-  gap: 0.5em;
+  gap: 0em; /* no gaps between the cells to avoid cursor flickering */
 }
 
 .date-header,
 .habit-row {
-  display: contents; 
+  display: contents;
 }
 
-.date-cell,
-.habit-cell {
+.date-cell, .habit-cell {
   text-align: center;
-  padding: 0.5em;
+  padding: 1em; 
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
-  font-weight: bold; 
-  font-family: 'Helvetica Neue', Arial, sans-serif; 
+  min-width: 80px; 
+  font-weight: bold;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  margin: -5px; /* cells overlap so default cursor never shows (no flickering between cursors) */
 }
 
-
-.date-cell:last-child,
-.habit-cell:last-child {
-  border-right: none;
+.date-cell {
+  cursor: default; 
 }
 
-.day-of-week,
-.day-of-month {
-  display: block; 
+.habit-cell {
+  cursor: url('../assets/watering_can_1.png') 20 45, auto; 
 }
 
-.habit-cell:not(:last-child) {
-  border-right: 1px solid #ccc; 
+.habit-cell:hover {
+  cursor: url('../assets/watering_can_1.png') 20 45, auto; 
 }
 
 .habit-name {
@@ -348,26 +346,25 @@ export default {
   flex: none;
   word-break: break-word;
   hyphens: auto;
-  font-weight: bold; 
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; 
-  transition: border-color 0.3s ease; 
-  padding: 10px; 
-  border: 2px solid transparent; 
-  border-radius: 6px; 
-  cursor: pointer; 
+  font-weight: bold;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  transition: border-color 0.3s ease;
+  padding: 10px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: default; 
   display: flex;
-  align-items: center; 
+  align-items: center;
 }
 
 .habit-name:hover {
-  border-color: #faa404; 
+  border-color: #faa404;
 }
 
-
-.habit-cell button {
+.habit-cell .habit-button {
   background-color: transparent;
   border: none;
-  cursor: pointer;
+  cursor: inherit; 
   font-size: 1.5em;
 }
 
