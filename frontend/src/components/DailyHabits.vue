@@ -34,16 +34,18 @@
       </div>
     </div>
 
-    <!-- Habit grid display -->
+      <!-- Habit grid display -->
     <div v-if="habits.length" class="habit-grid">
       <!-- Rows for habits and tick/cross status -->
       <div v-for="habit in habits" :key="habit.id" class="habit-row">
         <div class="habit-name" @click="openEditHabitModal(habit)">{{ habit.title }}</div>
-        <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
-          <button @click="toggleHabitCompletion(habit, date)">
-            {{ getHabitCompletionStatus(habit, date) ? '✓' : '✕' }}
-          </button>
-        </div>
+          <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
+            <button @click="toggleHabitCompletion(habit, date)">
+              <i v-if="getHabitCompletionStatus(habit, date)" class="fas fa-tree"></i>
+              <i v-else-if="isDateToday(date)" class="fas fa-seedling"></i>
+              <img v-else :src="deadTreeIcon" alt="Dead Tree" class="icon-dead-tree"/>
+            </button>
+          </div>
       </div>
     </div>
     <!-- Empty habits message -->
@@ -92,7 +94,9 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import { useHabitsStore } from '@/stores/useHabitsStore';
-import { format, subDays, addDays } from 'date-fns';
+import { format, subDays, addDays, isToday } from 'date-fns';
+import deadTreeIcon from '@/assets/dead_tree_1.png';
+
 
 export default {
   name: 'DailyHabits',
@@ -189,6 +193,10 @@ export default {
       showDeleteConfirm.value = false; 
     }
 
+    function isDateToday(date) {
+      return isToday(date);
+    }
+
     async function deleteHabit() {
       if (habitsStore.editingHabit) {
         try {
@@ -228,7 +236,8 @@ export default {
       showDeleteConfirm,
       confirmDelete,
       cancelDelete,
-
+      isDateToday,
+      deadTreeIcon,
     };
   },
 };
@@ -346,6 +355,7 @@ export default {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  font-size: 1.5em;
 }
 
 .form-title {
@@ -373,4 +383,18 @@ export default {
   font-style: italic; 
 }
 
+.habit-cell i {
+  color: #4CAF50; 
+}
+
+.habit-cell i.fa-seedling {
+  color: #96a75c; 
+}
+
+.icon-dead-tree {
+  width: 30px; 
+  height: auto;
+  position: relative;
+  top: -4px;
+}
 </style>
