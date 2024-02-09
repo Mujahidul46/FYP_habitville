@@ -17,7 +17,7 @@
       <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
-    <!-- Modal that shows after "Add Habit" clicked -->
+    <!-- Modal for addingh abit -->
     <div v-if="showAddHabitModal" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Create Habit</h2>
@@ -46,7 +46,8 @@
         </div>
       </div>
     </div>
-    <!-- "Edit Habit" Modal when user clicks on habit name -->
+
+    <!-- Edit habit modal -->
     <div v-if="showEditHabitModal && editingHabit" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Edit Habit</h2>
@@ -56,14 +57,27 @@
           <label for="editNotesInput">Notes</label>
           <textarea id="editNotesInput" v-model="editingHabit.notes" placeholder="Edit notes"></textarea>
           <div class="modal-footer">
+            <button type="button" class="delete-edit-habit-btn" @click="confirmDelete(editingHabit)">Delete</button>
             <button type="button" @click="closeEditModal">Cancel</button>
             <button type="submit">Save Changes</button>
           </div>
         </form>
       </div>
     </div>
+
+    <!-- Delete habit confirmation modal -->
+    <div v-if="showDeleteConfirm" class="modal-backdrop">
+      <div class="modal-content">
+        <h2 class="form-title">Are you sure you want to delete this habit? This action cannot be undone.</h2>
+        <div class="modal-footer">
+          <button type="button" @click="cancelDelete">Cancel</button>
+          <button type="button" @click="deleteHabit">Delete</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
 
 
 <script>
@@ -77,6 +91,7 @@ export default {
     const habitsStore = useHabitsStore();
     const showAddHabitModal = ref(false);
     const showEditHabitModal = ref(false);
+    const showDeleteConfirm = ref(false);
     const currentDate = ref(new Date());
     const maxPastDays = 60;
 
@@ -156,6 +171,28 @@ export default {
       habitsStore.editingHabit = null; 
     }
 
+    function confirmDelete(habit) {
+      showDeleteConfirm.value = true; 
+      habitsStore.editingHabit = habit;
+    }
+
+    function cancelDelete() { // hides the delete confirmation modal
+      showDeleteConfirm.value = false; 
+    }
+
+    async function deleteHabit() {
+      if (habitsStore.editingHabit) {
+        try {
+          await habitsStore.deleteHabit(habitsStore.editingHabit.id); // calls stores delete habit
+          showDeleteConfirm.value = false; 
+          closeEditModal(); 
+        } catch (error) {
+          console.error('Failed to delete habit:', error);
+        }
+      }
+    }
+
+
     onMounted(() => {
       habitsStore.fetchHabits();
     });
@@ -178,6 +215,11 @@ export default {
       submitHabitEdit,
       closeEditModal,
       editingHabit,
+      deleteHabit,
+      showDeleteConfirm,
+      confirmDelete,
+      cancelDelete,
+
     };
   },
 };

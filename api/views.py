@@ -251,3 +251,12 @@ def update_habit_view(request: HttpRequest, pk: int) -> HttpResponse: # updates 
     else:
         return HttpResponseNotAllowed(['PUT'])
 
+@csrf_exempt
+@login_required
+def delete_habit_view(request: HttpRequest, pk: int) -> HttpResponse: # deletes a habit and all its associated habit completions
+    if request.method == 'DELETE':
+        habit = get_object_or_404(Habit, pk=pk, user=request.user)  
+        habit.delete()  
+        return JsonResponse({'message': 'Habit deleted successfully'}, status=204)  
+    else:
+        return HttpResponseNotAllowed(['DELETE'])

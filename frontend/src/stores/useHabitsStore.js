@@ -133,7 +133,23 @@ export const useHabitsStore = defineStore('habits', {
     editHabit(habit) {
       this.editingHabit = { ...habit };
     },
-
-
+    async deleteHabit(habitId) {
+      try {
+        const response = await fetch(`http://localhost:8000/delete-habit/${habitId}/`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': this.csrfToken,
+          },
+          credentials: 'include',
+        });
+        if (response.ok) {
+          this.habits = this.habits.filter(habit => habit.id !== habitId); // filter out deleted habit from array
+        } else {
+          console.error('Failed to delete habit:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error deleting habit:', error);
+      }
+    },
   },
 });

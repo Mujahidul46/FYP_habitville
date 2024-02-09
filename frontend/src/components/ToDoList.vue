@@ -78,7 +78,7 @@
   
       <div v-if="todoStore.showDeleteConfirm" class="modal-backdrop">
         <div class="modal-content">
-          <h2 class="form-title">Are you sure you want to delete this To Do item?</h2>
+          <h2 class="form-title">Are you sure you want to delete this To Do item? This action cannot be undone.</h2>
           <div class="modal-footer">
             <button type="button" @click="todoStore.cancelDelete">Cancel</button>
             <button type="button" @click="todoStore.deleteToDo">Delete</button>

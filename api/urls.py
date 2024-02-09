@@ -20,4 +20,5 @@ urlpatterns = [
     path('list-habits/', views.list_habits_view, name='list_habits'),
     path('update-habit-completion/<int:habit_id>/', views.update_habit_completion_view, name='update_habit_completion'),
     path('update-habit/<int:pk>/', views.update_habit_view, name='update_habit'),
+    path('delete-habit/<int:pk>/', views.delete_habit_view, name='delete_habit'),
 ]
