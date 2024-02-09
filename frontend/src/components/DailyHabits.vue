@@ -89,14 +89,12 @@
   
 </template>
 
-
-
 <script>
 import { ref, computed, onMounted } from 'vue';
 import { useHabitsStore } from '@/stores/useHabitsStore';
 import { format, subDays, addDays, isToday } from 'date-fns';
 import deadTreeIcon from '@/assets/dead_tree_1.png';
-
+import complete_habit from '@/assets/sounds/complete_habit.mp3';
 
 export default {
   name: 'DailyHabits',
@@ -131,6 +129,15 @@ export default {
       return mostRecentDisplayedDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
     });
 
+    const complete_habit_sound_effect = new Audio(complete_habit);
+
+    function playSound() {
+      // restarts sound from beginning
+      complete_habit_sound_effect.currentTime = 0;
+      complete_habit_sound_effect.play().catch(error => console.error("Failed to play sound", error));
+    }
+
+
 
     function changeDate(days) {
       const newDate = addDays(currentDate.value, days);
@@ -146,9 +153,15 @@ export default {
     }
 
 
-    function toggleHabitCompletion(habit, date) { // 'X' -> tick or vice versa
-      habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date));
+    function toggleHabitCompletion(habit, date) {
+      if (!getHabitCompletionStatus(habit, date)) { // only when habit is being ticked, play sound 
+        playSound();
+      }
+
+      // toggles habit completion
+      habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date)); 
     }
+
 
     function getHabitCompletionStatus(habit, date) { // checks if tick or cross
       return habit.completions.some(completion => completion.date === date.toISOString().split('T')[0] && completion.completed);
