@@ -17,7 +17,7 @@
       <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
-    <!-- Modal for addingh abit -->
+    <!-- Modal for adding habit -->
     <div v-if="showAddHabitModal" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Create Habit</h2>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Habit grid display -->
-    <div class="habit-grid">
+    <div v-if="habits.length" class="habit-grid">
       <!-- Rows for habits and tick/cross status -->
       <div v-for="habit in habits" :key="habit.id" class="habit-row">
         <div class="habit-name" @click="openEditHabitModal(habit)">{{ habit.title }}</div>
@@ -44,6 +44,13 @@
             {{ getHabitCompletionStatus(habit, date) ? '✓' : '✕' }}
           </button>
         </div>
+      </div>
+    </div>
+    <!-- Empty habits message -->
+    <div v-else class="empty-habit-list">
+      <div class="empty-habit-content">
+        <h3 class="emptyTitle">You have no daily habits</h3>
+        <p>These are habits that you complete every day. E.g. "Work on assignments" or "Learn Spanish".</p>
       </div>
     </div>
 
@@ -76,6 +83,8 @@
       </div>
     </div>
   </div>
+
+  
 </template>
 
 
@@ -347,6 +356,21 @@ export default {
 
 .invisible {
   visibility: hidden; 
+}
+
+.empty-habit-list {
+  text-align: center;
+  margin-top: 5.5em; 
+  color: #a8a4a4; 
+  background-color: #bcdbba; 
+}
+
+.empty-habit-content h3 {
+  margin-bottom: 0.5em; 
+}
+
+.empty-habit-content p {
+  font-style: italic; 
 }
 
 </style>

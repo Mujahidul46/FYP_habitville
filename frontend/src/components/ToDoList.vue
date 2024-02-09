@@ -17,7 +17,7 @@
         <div v-if="todoStore.currentView === 'todos' && !todoStore.todos.length" class="empty-todo-list">
           <div class="empty-todo-content">
             <h3 class="emptyTitle">You have no To Do's</h3>
-            <p>These are one-off tasks. For example, "book an appointment" or "Email Alice".</p>
+            <p>These are one-off tasks. E.g. "book an appointment" or "Email Alice".</p>
           </div>
         </div>
   
@@ -166,7 +166,7 @@ export default {
     }
 
     .todo-list-container {
-    width: 500px;
+    width: 525px;
     min-height: 600px; 
     border: 2px solid #4CAF50;
     margin: auto;
@@ -289,9 +289,7 @@ export default {
       background-color: #add681; 
     }
 
-    .emptyTitle {
-      font-size: 1.3em;
-    }
+
 
     .accomplished .todo-item {
       cursor: default;
