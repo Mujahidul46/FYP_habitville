@@ -1,7 +1,7 @@
 <template>
   <div class="habit-tracker-container">
-    
-    <button class="add-habit-btn" @click="showAddHabitModal = true">Add Habit</button>
+    <!-- Add Habit Button -->
+    <button class="add-habit-btn" @click="openAddHabitModal">Add Habit</button>
 
     <!-- Date Navigation -->
     <div class="date-navigation">
@@ -10,37 +10,53 @@
       <!-- Date Header -->
       <div class="date-header">
         <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
-        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
         <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
+        <div class="date-cell-placeholder placeholder-adjustment"></div> <!-- Placeholder div for alignment -->
       </div>
       <!-- Right Arrow -->
       <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
-    <!-- Modal for adding habit -->
-    <div v-if="showAddHabitModal" class="modal-backdrop">
+    <!-- Modal for Adding Habit -->
+    <div v-if="isAddHabitModalVisible" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Create Habit</h2>
         <form @submit.prevent="createHabit">
+          <!-- Habit Title Input -->
           <label for="titleInput">Title<span class="required-asterisk">*</span></label>
           <input id="titleInput" v-model="newHabit.title" placeholder="Add a title" required>
+          <!-- Habit Notes Input -->
           <label for="notesInput">Notes</label>
           <textarea id="notesInput" v-model="newHabit.notes" placeholder="Add notes"></textarea>
+          <!-- Habit Difficulty Select -->
+          <label for="difficultySelect">Difficulty</label>
+          <select id="difficultySelect" v-model="selectedDifficulty">
+            <option value="TR">Trivial</option>
+            <option value="EA">Easy</option>
+            <option value="ME">Medium</option>
+            <option value="HA">Hard</option>
+          </select>
+          <!-- Modal Footer -->
           <div class="modal-footer">
-            <button type="button" @click="closeModal">Cancel</button>
+            <button type="button" @click="closeAddHabitModal">Cancel</button>
             <button type="submit">Create</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Habit grid display -->
-    <div v-if="habits.length" class="habit-grid">
-      <!-- Rows for habits and tick/cross status -->
-      <div v-for="habit in habits" :key="habit.id" class="habit-row">
-        <div class="habit-name" @click="openEditHabitModal(habit)">{{ habit.title }}</div>
+    <!-- Habit Grid Display -->
+    <div v-if="truncatedHabits.length" class="habit-grid">
+      <!-- Habit Rows -->
+      <div v-for="habit in truncatedHabits" :key="habit.id" class="habit-row">
+        <!-- Habit Name -->
+        <div class="habit-name" @click="() => openEditHabitModal(habit)">{{ habit.title }}</div>
+        <!-- Habit Completion Cells -->
         <div v-for="date in displayedDates" :key="`${habit.id}-${date}`" class="habit-cell">
-          <button @click="toggleHabitCompletion(habit, date)" class="habit-button">
+          <button @click="() => toggleHabitCompletion(habit, date)" class="habit-button">
             <!-- Icons for habit status -->
             <i v-if="getHabitCompletionStatus(habit, date)" class="fas fa-tree"></i>
             <i v-else-if="isDateToday(date)" class="fas fa-seedling"></i>
@@ -49,34 +65,46 @@
         </div>
       </div>
     </div>
-    <!-- Empty habits message -->
+
+    <!-- Message if No Habits -->
     <div v-else class="empty-habit-list">
       <div class="empty-habit-content">
-        <h3 class="emptyTitle">You have no daily habits</h3>
-        <p>These are habits that you complete every day. E.g. "Work on assignments" or "Learn Spanish".</p>
+        <h3 class="empty-title">You have no daily habits yet.</h3>
+        <p>Add a new habit to get started!</p>
       </div>
     </div>
 
-    <!-- Edit habit modal -->
-    <div v-if="showEditHabitModal && editingHabit" class="modal-backdrop">
+      <!-- Edit Habit Modal -->
+    <div v-if="isEditHabitModalVisible && editingHabit" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Edit Habit</h2>
         <form @submit.prevent="submitHabitEdit">
+          <!-- Edit Habit Title Input -->
           <label for="editTitleInput">Title<span class="required-asterisk">*</span></label>
           <input id="editTitleInput" v-model="editingHabit.title" placeholder="Edit title" required>
+          <!-- Edit Habit Notes Input -->
           <label for="editNotesInput">Notes</label>
           <textarea id="editNotesInput" v-model="editingHabit.notes" placeholder="Edit notes"></textarea>
+          <!-- Edit Habit Difficulty Select -->
+          <label for="editDifficultySelect">Difficulty</label>
+          <select id="editDifficultySelect" v-model="selectedDifficulty">
+            <option value="TR">Trivial</option>
+            <option value="EA">Easy</option>
+            <option value="ME">Medium</option>
+            <option value="HA">Hard</option>
+          </select>
+          <!-- Modal Footer -->
           <div class="modal-footer">
             <button type="button" class="delete-edit-habit-btn" @click="confirmDelete(editingHabit)">Delete</button>
-            <button type="button" @click="closeEditModal">Cancel</button>
+            <button type="button" @click="closeEditHabitModal">Cancel</button>
             <button type="submit">Save Changes</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Delete habit confirmation modal -->
-    <div v-if="showDeleteConfirm" class="modal-backdrop">
+    <!-- Delete Habit Confirmation Modal -->
+    <div v-if="isDeleteConfirmVisible" class="modal-backdrop">
       <div class="modal-content">
         <h2 class="form-title">Are you sure you want to delete this habit? This action cannot be undone.</h2>
         <div class="modal-footer">
@@ -93,21 +121,21 @@ import { ref, computed, onMounted } from 'vue';
 import { useHabitsStore } from '@/stores/useHabitsStore';
 import { format, subDays, addDays, isToday } from 'date-fns';
 import deadTreeIcon from '@/assets/dead_tree_1.png';
-import complete_habit from '@/assets/sounds/complete_habit.mp3';
+import completeHabitSound from '@/assets/sounds/complete_habit.mp3';
 import wateringCanIcon from '@/assets/watering_can_1.png';
 
 export default {
   name: 'DailyHabits',
   setup() {
     const habitsStore = useHabitsStore();
-    const showAddHabitModal = ref(false);
-    const showEditHabitModal = ref(false);
-    const showDeleteConfirm = ref(false);
+    const isAddHabitModalVisible = ref(false); 
+    const isEditHabitModalVisible = ref(false); 
+    const isDeleteConfirmVisible = ref(false); 
     const currentDate = ref(new Date());
     const maxPastDays = 60;
+    const selectedDifficulty = ref('ME');
 
     const habits = computed(() => habitsStore.habits);
-
     const editingHabit = computed(() => habitsStore.editingHabit);
 
     const displayedDates = computed(() => { // array of today and past 3 days
@@ -120,7 +148,7 @@ export default {
 
     const isOldestDate = computed(() => {
       const oldestDisplayedDate = displayedDates.value[displayedDates.value.length - 1];
-      const oldestAllowableDate = subDays(new Date(), maxPastDays); 
+      const oldestAllowableDate = subDays(new Date(), maxPastDays);
       return oldestDisplayedDate.setHours(0, 0, 0, 0) <= oldestAllowableDate.setHours(0, 0, 0, 0);
     });
 
@@ -129,15 +157,28 @@ export default {
       return mostRecentDisplayedDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
     });
 
-    const complete_habit_sound_effect = new Audio(complete_habit);
+    const completeHabitSoundEffect = new Audio(completeHabitSound);
+
+    const truncatedHabits = computed(() => { // no longer than 2 lines for a habit name (37 characters)
+      if (!habits.value) {
+        return []; 
+      }
+      return habits.value.map(habit => {
+        if (habit && habit.title) {
+          return {
+            ...habit,
+            title: habit.title.length > 37 ? habit.title.substring(0, 37) + '...' : habit.title
+          };
+        }
+        return habit; 
+      });
+    });
 
     function playSound() {
       // restarts sound from beginning
-      complete_habit_sound_effect.currentTime = 0;
-      complete_habit_sound_effect.play().catch(error => console.error("Failed to play sound", error));
+      completeHabitSoundEffect.currentTime = 0;
+      completeHabitSoundEffect.play().catch(error => console.error("Failed to play sound", error));
     }
-
-
 
     function changeDate(days) {
       const newDate = addDays(currentDate.value, days);
@@ -147,63 +188,65 @@ export default {
     }
 
     function formatDate(date) {
-      const dayOfWeek = format(date, 'E').toUpperCase(); // e.g., WED, TUE, uppercase days
-      const dayOfMonth = format(date, 'd'); // E.g., 7, or 17, no leading 0 for single digit dates
+      const dayOfWeek = format(date, 'E').toUpperCase();
+      const dayOfMonth = format(date, 'd');
       return `<span class="day-of-week">${dayOfWeek}</span><span class="day-of-month">${dayOfMonth}</span>`;
     }
 
-
     function toggleHabitCompletion(habit, date) {
-      if (!getHabitCompletionStatus(habit, date)) { // only when habit is being ticked, play sound 
+      if (!getHabitCompletionStatus(habit, date)) {
         playSound();
       }
-
-      // toggles habit completion
-      habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date)); 
+      habitsStore.updateHabitCompletion(habit.id, date.toISOString().split('T')[0], !getHabitCompletionStatus(habit, date));
     }
 
-
-    function getHabitCompletionStatus(habit, date) { // checks if tick or cross
+    function getHabitCompletionStatus(habit, date) {
       return habit.completions.some(completion => completion.date === date.toISOString().split('T')[0] && completion.completed);
     }
 
     function createHabit() {
-      habitsStore.createHabit();
-      closeModal(); 
+      habitsStore.createHabit(selectedDifficulty.value);
+      closeAddHabitModal();
     }
 
-    function closeModal() {
-      showAddHabitModal.value = false;
-      habitsStore.resetNewHabit(); 
+    function closeAddHabitModal() {
+      isAddHabitModalVisible.value = false;
+      habitsStore.resetNewHabit();
+    }
+
+    function openAddHabitModal() {
+      isAddHabitModalVisible.value = true;
+      selectedDifficulty.value = 'ME'; // Resets to medium difficulty
+    }
+
+    function openEditHabitModal(truncatedHabit) {
+      const fullHabit = habits.value.find(h => h.id === truncatedHabit.id); // find full habit object by using its id
+      habitsStore.editHabit(fullHabit);
+      selectedDifficulty.value = fullHabit.difficulty;
+      isEditHabitModalVisible.value = true;
     }
 
 
-    function openEditHabitModal(habit) {
-      habitsStore.editHabit(habit);
-      showEditHabitModal.value = true;
-    }
-
-
-    function submitHabitEdit() { 
+    function submitHabitEdit() {
       if (habitsStore.editingHabit) {
         const { id, ...updatedHabitData } = habitsStore.editingHabit;
-        habitsStore.updateHabit(id, updatedHabitData);
-        closeEditModal();
+        habitsStore.updateHabit(id, updatedHabitData, selectedDifficulty.value);
+        closeEditHabitModal();
       }
     }
 
-    function closeEditModal() {
-      showEditHabitModal.value = false;
-      habitsStore.editingHabit = null; 
+    function closeEditHabitModal() {
+      isEditHabitModalVisible.value = false;
+      habitsStore.editingHabit = null;
     }
 
     function confirmDelete(habit) {
-      showDeleteConfirm.value = true; 
+      isDeleteConfirmVisible.value = true;
       habitsStore.editingHabit = habit;
     }
 
-    function cancelDelete() { // hides the delete confirmation modal
-      showDeleteConfirm.value = false; 
+    function cancelDelete() {
+      isDeleteConfirmVisible.value = false;
     }
 
     function isDateToday(date) {
@@ -212,24 +255,26 @@ export default {
 
     async function deleteHabit() {
       if (habitsStore.editingHabit) {
-        try {
-          await habitsStore.deleteHabit(habitsStore.editingHabit.id); // calls stores delete habit
-          showDeleteConfirm.value = false; 
-          closeEditModal(); 
-        } catch (error) {
-          console.error('Failed to delete habit:', error);
-        }
+        await habitsStore.deleteHabit(habitsStore.editingHabit.id);
+        isDeleteConfirmVisible.value = false;
+        closeEditHabitModal();
       }
     }
 
+    function editHabit(habit) {
+      habitsStore.editHabit(habit);
+      selectedDifficulty.value = habit.difficulty;
+      isEditHabitModalVisible.value = true;
+    }
 
     onMounted(() => {
       habitsStore.fetchHabits();
     });
 
     return {
-      showAddHabitModal,
-      closeModal, 
+      isAddHabitModalVisible,
+      closeAddHabitModal,
+      openAddHabitModal,
       habits,
       newHabit: habitsStore.newHabit,
       displayedDates,
@@ -240,18 +285,20 @@ export default {
       toggleHabitCompletion,
       getHabitCompletionStatus,
       createHabit,
-      showEditHabitModal,
+      isEditHabitModalVisible,
       openEditHabitModal,
       submitHabitEdit,
-      closeEditModal,
+      closeEditHabitModal,
       editingHabit,
       deleteHabit,
-      showDeleteConfirm,
+      isDeleteConfirmVisible,
       confirmDelete,
       cancelDelete,
       isDateToday,
       deadTreeIcon,
       wateringCanIcon,
+      selectedDifficulty,
+      truncatedHabits,
     };
   },
 };
@@ -306,7 +353,7 @@ export default {
 
 .habit-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 2fr repeat(5, 1fr);
   align-items: center;
   gap: 0em; /* no gaps between the cells to avoid cursor flickering */
 }
@@ -323,7 +370,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 80px; 
+  min-width: 73px; 
   font-weight: bold;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin: -5px; /* cells overlap so default cursor never shows (no flickering between cursors) */
@@ -335,6 +382,7 @@ export default {
 
 .habit-cell {
   cursor: url('../assets/watering_can_1.png') 20 45, auto; 
+  border: 1px solid #bcdbba; /* need this otherwise cursor flickers */
 }
 
 .habit-cell:hover {
@@ -407,4 +455,44 @@ export default {
   position: relative;
   top: -4px;
 }
+
+select {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  background-color: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #495057;
+  appearance: none; 
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+}
+
+/* Dropdown - Downwards arrow indicator */
+select {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px top 50%;
+  background-size: 16px;
+}
+
+option {
+  padding: 10px;
+}
+
+select:hover,
+select:focus {
+  border-color: #80bdff;
+  outline: none; 
+}
+
+.placeholder-adjustment {
+  width: 9px; 
+}
+
+
+
 </style>

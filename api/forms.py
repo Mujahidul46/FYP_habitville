@@ -36,13 +36,15 @@ class ToDoForm(forms.ModelForm):
 class HabitForm(forms.ModelForm):
     title = forms.CharField(required=True, max_length=255)
     notes = forms.CharField(required=False, widget=forms.Textarea)
+    difficulty = forms.ChoiceField(choices=Habit.DIFFICULTY_CHOICES, required=True)
+
 
     class Meta:
         model = Habit
-        fields = ('title', 'notes')
+        fields = ('title', 'notes', 'difficulty')  
 
     def __init__(self, *args, **kwargs):
         super(HabitForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Habit Title'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes'})
-
+        self.fields['difficulty'].widget.attrs.update({'class': 'form-control'})

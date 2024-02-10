@@ -6,7 +6,8 @@ export const useHabitsStore = defineStore('habits', {
     habits: [],
     newHabit: {
       title: '',
-      notes: ''
+      notes: '',
+      difficulty: 'ME',
     },
     editingHabit: null,
   }),
@@ -42,8 +43,9 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error fetching habits:', error);
       }
     },
-    async createHabit() {
-      console.log('Creating habit with:', this.newHabit);
+    async createHabit(selectedDifficulty) {
+      console.log('Sending new habit with:', JSON.stringify(this.newHabit));
+      this.newHabit.difficulty = selectedDifficulty;
       try {
         const response = await fetch("http://localhost:8000/create-habit/", {
           method: 'POST',
@@ -71,7 +73,8 @@ export const useHabitsStore = defineStore('habits', {
       this.$patch({
         newHabit: {
           title: '',
-          notes: ''
+          notes: '',
+          difficulty: 'ME' 
         }
       });
     },
@@ -105,8 +108,9 @@ export const useHabitsStore = defineStore('habits', {
       }
     },
 
-    async updateHabit(habitId, updatedHabitData) {
+    async updateHabit(habitId, updatedHabitData, selectedDifficulty) {
       console.log(`Updating habit id ${habitId} with:`, updatedHabitData);
+      updatedHabitData.difficulty = selectedDifficulty;
       try {
         const response = await fetch(`http://localhost:8000/update-habit/${habitId}/`, {
           method: 'PUT',
@@ -130,6 +134,7 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error updating habit:', error);
       }
     },
+    
     editHabit(habit) {
       this.editingHabit = { ...habit };
     },

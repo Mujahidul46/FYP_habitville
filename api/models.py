@@ -53,10 +53,17 @@ class ToDo(models.Model):
         super(ToDo, self).save(*args, **kwargs)
 
 class Habit(models.Model):
+    DIFFICULTY_CHOICES = [ # TR, EA, ME, HA shorthand form stored in database
+    ('TR', 'Trivial'), 
+    ('EA', 'Easy'),
+    ('ME', 'Medium'),
+    ('HA', 'Hard'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits')
     title = models.CharField(max_length=255)
     notes = models.TextField(blank=True, null=True)
-    
+    difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES, default='ME')
+
     def __str__(self):
         return self.title
 

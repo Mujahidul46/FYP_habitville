@@ -25,8 +25,8 @@ class ToDoAdmin(admin.ModelAdmin):
         return qs.filter(user=request.user)
     
 class HabitAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'notes')
-    list_filter = ('user',)
+    list_display = ('title', 'user', 'difficulty', 'notes') 
+    list_filter = ('user', 'difficulty') 
     search_fields = ('title', 'notes')
 
     def get_queryset(self, request):

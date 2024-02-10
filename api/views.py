@@ -184,22 +184,29 @@ def list_completed_todos_view(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 @login_required
-def create_habit_view(request: HttpRequest) -> HttpResponse: # creates a habit
+def create_habit_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         data = json.loads(request.body)
-        title = data.get('title') # extracts title
-        notes = data.get('notes', '') # extracts notes, if not provided it will be empty string
+        title = data.get('title')
+        notes = data.get('notes', '')
+        difficulty = data.get('difficulty', 'ME')
         if title:  
-            habit = Habit.objects.create(user=request.user, title=title, notes=notes) # creates habit
-            return JsonResponse({'id': habit.id, 'title': habit.title, 'notes': habit.notes}, status=201)
+            habit = Habit.objects.create(user=request.user, title=title, notes=notes, difficulty=difficulty)
+            return JsonResponse({
+                'id': habit.id, 
+                'title': habit.title, 
+                'notes': habit.notes, 
+                'difficulty': habit.difficulty
+            }, status=201)
         else: 
             return JsonResponse({'error': 'Title is required.'}, status=400)
     else:
         return HttpResponseNotAllowed(['POST'])
 
+
 @csrf_exempt
 @login_required
-def list_habits_view(request: HttpRequest) -> HttpResponse: # lists all habits
+def list_habits_view(request: HttpRequest) -> HttpResponse: 
     if request.method == 'GET':
         habits = Habit.objects.filter(user=request.user)
         habit_data = []
@@ -209,11 +216,13 @@ def list_habits_view(request: HttpRequest) -> HttpResponse: # lists all habits
                 'id': habit.id,
                 'title': habit.title,
                 'notes': habit.notes,
+                'difficulty': habit.difficulty,  
                 'completions': list(completions),
             })
         return JsonResponse(habit_data, safe=False)
     else:
         return HttpResponseNotAllowed(['GET'])
+
 
 @csrf_exempt
 @login_required
@@ -236,15 +245,14 @@ def update_habit_completion_view(request: HttpRequest, habit_id: int) -> HttpRes
     
 @csrf_exempt
 @login_required
-def update_habit_view(request: HttpRequest, pk: int) -> HttpResponse: # updates title and notes 
+def update_habit_view(request: HttpRequest, pk: int) -> HttpResponse:
     habit = get_object_or_404(Habit, pk=pk, user=request.user)
-
     if request.method == 'PUT':
         data = json.loads(request.body)
         form = HabitForm(data, instance=habit)
         if form.is_valid():
             updated_habit = form.save()
-            habit_data = model_to_dict(updated_habit, fields=['id', 'title', 'notes'])
+            habit_data = model_to_dict(updated_habit, fields=['id', 'title', 'notes', 'difficulty'])
             return JsonResponse(habit_data, status=200)
         else:
             return JsonResponse(form.errors, status=400)
