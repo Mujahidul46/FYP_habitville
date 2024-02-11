@@ -11,6 +11,8 @@ from django.middleware.csrf import get_token
 from django.forms.models import model_to_dict
 from django.utils.timezone import now
 from datetime import datetime
+from .points_service import calculate_points
+from decimal import Decimal
 
 
 def main_spa(request: HttpRequest) -> HttpResponse: 
@@ -67,9 +69,12 @@ def user_api(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'username': request.user.username,
             'email': request.user.email,
-            'goals': request.user.goals
+            'goals': request.user.goals,
+            'habit_points': request.user.habit_points,  
+            'life_points': float(request.user.life_points),  
         })
     return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
+
 
 @login_required
 @csrf_exempt
@@ -226,18 +231,33 @@ def list_habits_view(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 @login_required
-def update_habit_completion_view(request: HttpRequest, habit_id: int) -> HttpResponse: # updates completion status of habit
+def update_habit_completion_view(request: HttpRequest, habit_id: int) -> JsonResponse:
     if request.method == 'PUT':
         habit = get_object_or_404(Habit, id=habit_id, user=request.user)
         data = json.loads(request.body)
         date = data.get('date')
         completed = data.get('completed')
+        
         if date is not None and isinstance(completed, bool):
             date = datetime.strptime(date, '%Y-%m-%d').date()  
             habit_completion, created = HabitCompletion.objects.get_or_create(habit=habit, date=date)
             habit_completion.completed = completed
+            
+            if completed and created:
+                hp_earned, lp_earned = calculate_points(habit.difficulty)
+                request.user.habit_points += hp_earned
+                request.user.life_points += Decimal(lp_earned).quantize(Decimal('0.00'))
+                request.user.save()
+                
             habit_completion.save()
-            return JsonResponse({'habit_id': habit_id, 'date': date.isoformat(), 'completed': completed}, status=200)
+            response_data = {
+                'habit_id': habit_id,
+                'date': date.isoformat(),
+                'completed': completed,
+                'hp_earned': hp_earned if completed and created else 0,
+                'lp_earned': float(lp_earned) if completed and created else 0.00,
+            }
+            return JsonResponse(response_data, status=200)
         else:
             return JsonResponse({'error': 'Date and completed status are required.'}, status=400)
     else:

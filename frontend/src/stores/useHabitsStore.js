@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useProfileStore } from './useProfileStore';
 
 export const useHabitsStore = defineStore('habits', {
   state: () => ({
@@ -91,6 +92,7 @@ export const useHabitsStore = defineStore('habits', {
         });
         if (response.ok) {
           let habit = this.habits.find(h => h.id === habitId);
+          let responseData = await response.json();
           if (habit) {
             habit.completions = habit.completions || []; 
             let completion = habit.completions.find(c => c.date === date);
@@ -98,6 +100,11 @@ export const useHabitsStore = defineStore('habits', {
               completion.completed = completed;
             } else {
               habit.completions.push({ date, completed });
+            }
+            
+            if (completed && responseData.hp_earned > 0) {
+              const profileStore = useProfileStore();
+              profileStore.updatePoints(responseData.hp_earned, responseData.lp_earned);
             }
           }
         } else {

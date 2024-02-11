@@ -4,9 +4,9 @@ from .models import User, ToDo, Habit, HabitCompletion
 
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'goals')
+    list_display = ('username', 'email', 'is_staff', 'is_active', 'goals', 'habit_points', 'life_points')
     fieldsets = BaseUserAdmin.fieldsets + (
-        (None, {'fields': ('goals',)}),
+        (None, {'fields': ('goals', 'habit_points', 'life_points')}),
     )
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (None, {'fields': ('email', 'username', 'password1', 'password2', 'goals')}),

@@ -9,6 +9,8 @@ class User(AbstractUser):
     username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
     goals = models.TextField(blank=True, null=True)
+    habit_points = models.IntegerField(default=0)  
+    life_points = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
 
     def __str__(self):
         return self.username
@@ -20,7 +22,9 @@ class User(AbstractUser):
         return {
             'username': self.username,
             'email': self.email,
-            'goals': self.goals
+            'goals': self.goals,
+            'habit_points': self.habit_points,  
+            'life_points': float(self.life_points)  
         }
     
 class ToDo(models.Model):

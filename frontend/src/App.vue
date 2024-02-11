@@ -10,9 +10,7 @@
               to="/"
               class="btn btn-outline-light m-2"
               active-class="nav-link-active"
-            >
-              Habit Tracker
-            </router-link>
+            >Habit Tracker</router-link>
           </li>
           <!-- Profile Page button -->
           <li class="nav-item">
@@ -20,9 +18,7 @@
               to="/profile"
               class="btn btn-outline-light m-2"
               active-class="nav-link-active"
-            >
-              Profile Page
-            </router-link>
+            >Profile Page</router-link>
           </li>
           <!-- Logout button -->
           <li class="nav-item">
@@ -30,29 +26,33 @@
               type="button"
               class="btn btn-outline-light m-2"
               @click="logout"
-            >
-              Logout
-            </button>
+            >Logout</button>
           </li>
         </ul>
       </div>
-      <!-- Profile icon -->
+      <!-- Profile icon and points display -->
       <div class="navbar-account">
         <span class="navbar-text">
           <i class="fas fa-user"></i>
           <span class="username">{{ userProfile.username }}</span>
+          <!-- Habit Points and Life Points -->
+          <span class="points" v-if="userProfile && userProfile.life_points !== undefined">
+            HP: {{ userProfile.habit_points || 0 }} | LP: {{ userProfile.life_points.toFixed(2) }}
+          </span>
         </span>
       </div>
     </div>
   </nav>
   
   <main class="container pt-4">
-    <RouterView class="flex-shrink-0" />
+    <RouterView></RouterView>
   </main>
 </template>
 
+
+
 <script>
-import { defineComponent, onMounted, ref, watch } from "vue";
+import { defineComponent, onMounted, computed } from "vue";
 import { RouterView } from "vue-router";
 import { useProfileStore } from "@/stores/useProfileStore";
 
@@ -61,33 +61,24 @@ export default defineComponent({
 
   setup() {
     const profileStore = useProfileStore();
-    const userProfile = ref(profileStore.user);
 
     onMounted(async () => {
       await profileStore.fetchUserProfile();
     });
 
-    watch(
-      () => profileStore.user,
-      (newUser) => {
-        userProfile.value = newUser;
-      },
-      { immediate: true }
-    );
+    const userProfile = computed(() => profileStore.user);
+
+    const logout = () => {
+      window.location.href = "http://localhost:8000/logout/";
+    };
 
     return {
       userProfile,
+      logout,
     };
-  },
-
-  methods: {
-    logout() {
-      window.location.href = "http://localhost:8000/logout/";
-    },
   },
 });
 </script>
-
 
 <style>
 body, html {
