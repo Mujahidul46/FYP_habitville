@@ -3,22 +3,22 @@ from decimal import Decimal
 
 def calculate_points(difficulty):
     points_map = {
-        'TR': (5, 20),   # Trivial
-        'EA': (15, 35),   # Easy
-        'ME': (30, 55),   # Medium
-        'HA': (50, 75),  # Hard
+        'TR': (1, 10), # Trivial
+        'EA': (10, 25),   # Easy
+        'ME': (25, 60),   # Medium
+        'HA': (60, 100),  # Hard
     }
     lp_chance = {
         'TR': 0.10,  # 10% chance to earn LP for Trivial tasks
-        'EA': 0.225, # 22.5% chance for Easy
-        'ME': 0.35,  # 35% chance for Medium
-        'HA': 0.45,  # 45% chance for Hard
+        'EA': 0.25, # 25% chance for Easy
+        'ME': 0.75,  # 75% chance for Medium
+        'HA': 1,  # 100% chance for Hard
     }
     lp_range = {
-        'TR': (0.5, 2),   # Trivial
-        'EA': (1.5, 3.5), # Easy
-        'ME': (3, 5.5),   # Medium
-        'HA': (5, 7.5),   # Hard
+        'TR': (0.1, 1),   # Trivial
+        'EA': (1, 2), # Easy
+        'ME': (2, 3),   # Medium
+        'HA': (3, 4),   # Hard
     }
     
     hp_min, hp_max = points_map[difficulty]

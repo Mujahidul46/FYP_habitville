@@ -33,14 +33,19 @@
       <!-- Profile icon and points display -->
       <div class="navbar-account">
         <span class="navbar-text">
+          <span class="points" v-if="userProfile && userProfile.life_points !== undefined">
+            <img src="@/assets/gem_1.png" class="gem-icon" alt="HP" />
+            <span class="points-number">{{ userProfile.habit_points || 0 }}</span>
+            <i class="fas fa-heart pixelated-heart"></i>
+            <span class="points-number">{{ userProfile.life_points.toFixed(2) }}</span>
+          </span>
           <i class="fas fa-user"></i>
           <span class="username">{{ userProfile.username }}</span>
-          <!-- Habit Points and Life Points -->
-          <span class="points" v-if="userProfile && userProfile.life_points !== undefined">
-            HP: {{ userProfile.habit_points || 0 }} | LP: {{ userProfile.life_points.toFixed(2) }}
-          </span>
         </span>
       </div>
+
+
+
     </div>
   </nav>
   
@@ -130,12 +135,17 @@ body, html {
 }
 
 .navbar-custom .fas.fa-user {
-    font-size: 1.2rem;
+    font-size: 1.35rem;
+    position: relative;
+    top: 2px; 
+    margin-right: 0.25rem; 
 }
 
 .navbar-custom .username {
     font-weight: bold;
     white-space: nowrap;
+    font-size: 1.1rem;
+    margin-left: -0.4rem; 
 }
 
 .navbar-custom .navbar-account {
@@ -222,5 +232,37 @@ main {
   padding: .375rem .75rem; 
   border: 1px solid #027d40; 
 }
+
+.points-number {
+  font-weight: bold;
+  font-size: larger;
+  margin-left: 0.25rem; 
+  position: relative;
+  top: 1.75px; 
+}
+
+
+.gem-icon {
+  width: 1.8rem; 
+  height: auto;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  position: relative;
+}
+
+.pixelated-heart {
+  color: red;
+  -webkit-text-stroke: 2px black;
+  font-size: 1.5rem;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  position: relative;
+  top: 5.5px; 
+  margin-left: 0.5rem; 
+  margin-right: 0.1rem;
+}
+
+
 
 </style>
