@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container">
+
       <span class="navbar-brand">Habitville</span>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
@@ -43,10 +43,6 @@
           <span class="username">{{ userProfile.username }}</span>
         </span>
       </div>
-
-
-
-    </div>
   </nav>
   
   <main class="container pt-4">
@@ -106,7 +102,7 @@ body, html {
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    padding: 0 1rem;
+    padding: 0 1.5rem !important;
 }
 
 .navbar-custom .navbar-brand,
