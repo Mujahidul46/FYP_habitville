@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { useProfileStore } from './useProfileStore';
+import { useNotificationStore } from './useNotificationStore';
 
 export const useHabitsStore = defineStore('habits', {
   state: () => ({
@@ -105,6 +106,8 @@ export const useHabitsStore = defineStore('habits', {
             if (completed && responseData.hp_earned > 0) {
               const profileStore = useProfileStore();
               profileStore.updatePoints(responseData.hp_earned, responseData.lp_earned);
+
+              this.showPointsEarnedNotification(responseData.hp_earned, responseData.lp_earned);
             }
           }
         } else {
@@ -163,5 +166,15 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error deleting habit:', error);
       }
     },
+    showPointsEarnedNotification(hp, lp) {
+      const notificationStore = useNotificationStore();
+      let message = `You earned ${hp} Habit Points`;
+      if (lp > 0) { // Add life points part of message only if more than 0 were earned
+        message += ` and ${lp.toFixed(2)} Life Points`;
+      }
+      message += '!';
+      notificationStore.addNotification(message);
+    },
+    
   },
 });

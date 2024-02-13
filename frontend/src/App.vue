@@ -1,6 +1,5 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-custom">
-
       <span class="navbar-brand">Habitville</span>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
@@ -44,7 +43,13 @@
         </span>
       </div>
   </nav>
-  
+  <notification
+    v-for="(notification, index) in notifications"
+    :key="notification.id"
+    :message="notification.message"
+    :show="notification.show"
+    :style="{ '--notification-top': `${70 + index * 60}px` }" 
+  />
   <main class="container pt-4">
     <RouterView></RouterView>
   </main>
@@ -53,21 +58,25 @@
 
 
 <script>
-import { defineComponent, onMounted, computed } from "vue";
-import { RouterView } from "vue-router";
-import { useProfileStore } from "@/stores/useProfileStore";
+import { defineComponent, onMounted, computed } from 'vue';
+import { RouterView } from 'vue-router';
+import { useProfileStore } from '@/stores/useProfileStore';
+import Notification from '@/components/Notification.vue';
+import { useNotificationStore } from '@/stores/useNotificationStore';
 
 export default defineComponent({
-  components: { RouterView },
+  components: { RouterView, Notification },
 
   setup() {
     const profileStore = useProfileStore();
+    const notificationStore = useNotificationStore(); 
 
     onMounted(async () => {
       await profileStore.fetchUserProfile();
     });
 
     const userProfile = computed(() => profileStore.user);
+    const notifications = computed(() => notificationStore.notifications); 
 
     const logout = () => {
       window.location.href = "http://localhost:8000/logout/";
@@ -75,11 +84,13 @@ export default defineComponent({
 
     return {
       userProfile,
+      notifications, 
       logout,
     };
   },
 });
 </script>
+
 
 <style>
 body, html {
