@@ -23,4 +23,6 @@ urlpatterns = [
     path('delete-habit/<int:pk>/', views.delete_habit_view, name='delete_habit'),
     path('create-reward/', views.create_reward_view, name='create_reward'),
     path('list-rewards/', views.list_rewards_view, name='list_rewards'),
+    path('spend-reward/<int:reward_id>/', views.spend_reward_view, name='spend_reward'),
+    path('delete-reward/<int:pk>/', views.delete_reward_view, name='delete_reward'),
 ]

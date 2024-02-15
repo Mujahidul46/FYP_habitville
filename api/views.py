@@ -313,3 +313,34 @@ def list_rewards_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse(list(rewards), safe=False)
     else:
         return HttpResponseNotAllowed(['GET'])
+
+@csrf_exempt
+@login_required
+def spend_reward_view(request: HttpRequest, reward_id: int) -> JsonResponse:
+    if request.method == 'POST':
+        reward = get_object_or_404(Reward, pk=reward_id, user=request.user)
+        if request.user.life_points >= reward.cost:
+            request.user.life_points -= reward.cost
+            request.user.save(update_fields=['life_points'])
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Reward spent successfully!',
+                'new_life_points': float(request.user.life_points)
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Not enough life points to get this reward.'
+            }, status=400)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+    
+@csrf_exempt
+@login_required
+def delete_reward_view(request: HttpRequest, pk: int) -> HttpResponse:
+    if request.method == 'DELETE':
+        reward = get_object_or_404(Reward, pk=pk, user=request.user)  
+        reward.delete()  
+        return JsonResponse({'message': 'Reward deleted successfully'}, status=204)  
+    else:
+        return HttpResponseNotAllowed(['DELETE'])

@@ -75,6 +75,13 @@ export const useProfileStore = defineStore('profile', {
         this.user.life_points += parsedLP;
       }
     },
+    spendLifePoints(cost) {
+      const lifePointsCost = parseFloat(cost);
+      if (!isNaN(lifePointsCost)) {
+        this.user.life_points -= lifePointsCost;
+        this.user.life_points = parseFloat(this.user.life_points.toFixed(2));
+      }
+    },
       
     }
 });

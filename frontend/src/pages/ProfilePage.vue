@@ -1,6 +1,6 @@
 <template>
   <div class="profile-page">
-    <h1>Profile</h1>
+    <h1 class="ProfileFormTitle">Profile</h1>
     <form @submit.prevent="updateProfile">
       <div>
         <label for="username">Username:</label>
@@ -106,5 +106,7 @@ export default defineComponent({
   transition: opacity 0.5s ease;
 }
 
-
+.ProfileFormTitle {
+  text-align: center;
+}
 </style>
