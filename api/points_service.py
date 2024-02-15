@@ -1,7 +1,7 @@
 import random
 from decimal import Decimal
 
-def calculate_points(difficulty):
+def calculate_points(difficulty): # calculated how many HP & LP to award upon completion of habits
     points_map = {
         'TR': (1, 10), # Trivial
         'EA': (10, 25),   # Easy

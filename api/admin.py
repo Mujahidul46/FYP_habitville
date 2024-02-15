@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ToDo, Habit, HabitCompletion
+from .models import User, ToDo, Habit, HabitCompletion, Reward
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -46,7 +46,19 @@ class HabitCompletionAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(habit__user=request.user)
     
+class RewardAdmin(admin.ModelAdmin):
+    list_display = ('name', 'cost', 'user', 'notes')
+    list_filter = ('user',)
+    search_fields = ('name', 'notes', 'cost')
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
+    
 admin.site.register(User, UserAdmin)
 admin.site.register(ToDo, ToDoAdmin)
 admin.site.register(Habit, HabitAdmin)
 admin.site.register(HabitCompletion, HabitCompletionAdmin)
+admin.site.register(Reward, RewardAdmin)

@@ -68,6 +68,11 @@ export default defineComponent({
 
  
 <style scoped>
+
+.profile-page {
+  max-width: 540px;
+  margin: auto;
+}
 .profile-page input,
 .profile-page textarea {
     background-color: white; 

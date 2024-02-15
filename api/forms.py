@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import ToDo, Habit
+from .models import ToDo, Habit, Reward
 
 User = get_user_model()
 
@@ -48,3 +48,19 @@ class HabitForm(forms.ModelForm):
         self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Habit Title'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes'})
         self.fields['difficulty'].widget.attrs.update({'class': 'form-control'})
+
+class RewardForm(forms.ModelForm):
+    name = forms.CharField(required=True, max_length=255)
+    notes = forms.CharField(required=False, widget=forms.Textarea)
+    cost = forms.DecimalField(required=True, max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = Reward
+        fields = ('name', 'notes', 'cost')
+
+    def __init__(self, *args, **kwargs):
+        super(RewardForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Reward Name'})
+        self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes (Optional)'})
+        self.fields['cost'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Cost in Life Points'})
+        

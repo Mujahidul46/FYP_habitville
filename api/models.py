@@ -89,3 +89,20 @@ class HabitCompletion(models.Model):
             'completed': self.completed
         }
 
+class Reward(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rewards')
+    name = models.CharField(max_length=255)
+    notes = models.TextField(blank=True, null=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.name} - {self.cost} LP"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.username,
+            'name': self.name,
+            'notes': self.notes,
+            'cost': float(self.cost),
+        }

@@ -50,7 +50,7 @@
     :show="notification.show"
     :style="{ '--notification-top': `${70 + index * 60}px` }" 
   />
-  <main class="container pt-4">
+  <main class="container-fluid pt-4">
     <RouterView></RouterView>
   </main>
 </template>
@@ -269,7 +269,4 @@ main {
   margin-left: 0.5rem; 
   margin-right: 0.1rem;
 }
-
-
-
 </style>

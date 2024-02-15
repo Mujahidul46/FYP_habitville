@@ -166,7 +166,6 @@ export default {
     }
 
     .todo-list-container {
-    width: 525px;
     min-height: 600px; 
     border: 2px solid #4CAF50;
     margin: auto;
@@ -288,9 +287,7 @@ export default {
     .to-do .todo-list-container .view-toggle:hover {
       background-color: #add681; 
     }
-
-
-
+    
     .accomplished .todo-item {
       cursor: default;
     }

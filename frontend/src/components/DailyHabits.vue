@@ -306,14 +306,12 @@ export default {
 
 <style scoped>
 .habit-tracker-container {
-  width: 750px;
   min-height: 600px;
   border: 2px solid #4CAF50;
   margin-right: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 1em;
   background-color: #bcdbba;
-  float: left;
 }
 
 .nav-arrow {

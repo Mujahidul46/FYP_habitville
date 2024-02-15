@@ -21,4 +21,6 @@ urlpatterns = [
     path('update-habit-completion/<int:habit_id>/', views.update_habit_completion_view, name='update_habit_completion'),
     path('update-habit/<int:pk>/', views.update_habit_view, name='update_habit'),
     path('delete-habit/<int:pk>/', views.delete_habit_view, name='delete_habit'),
+    path('create-reward/', views.create_reward_view, name='create_reward'),
+    path('list-rewards/', views.list_rewards_view, name='list_rewards'),
 ]

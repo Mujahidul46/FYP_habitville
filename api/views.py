@@ -3,9 +3,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm, ToDoForm, HabitForm
+from .forms import CustomUserCreationForm, ToDoForm, HabitForm, RewardForm
 from django.contrib.auth.decorators import login_required
-from .models import User, ToDo, Habit, HabitCompletion
+from .models import User, ToDo, Habit, HabitCompletion, Reward
 import json
 from django.middleware.csrf import get_token 
 from django.forms.models import model_to_dict
@@ -288,3 +288,28 @@ def delete_habit_view(request: HttpRequest, pk: int) -> HttpResponse: # deletes 
         return JsonResponse({'message': 'Habit deleted successfully'}, status=204)  
     else:
         return HttpResponseNotAllowed(['DELETE'])
+
+
+@csrf_exempt
+@login_required
+def create_reward_view(request: HttpRequest) -> JsonResponse:
+    if request.method == 'POST':
+        form = RewardForm(json.loads(request.body))
+        if form.is_valid():
+            reward = form.save(commit=False)
+            reward.user = request.user
+            reward.save()
+            return JsonResponse(model_to_dict(reward), status=201)
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+@csrf_exempt
+@login_required
+def list_rewards_view(request: HttpRequest) -> JsonResponse:
+    if request.method == 'GET':
+        rewards = Reward.objects.filter(user=request.user).values('id', 'name', 'notes', 'cost')
+        return JsonResponse(list(rewards), safe=False)
+    else:
+        return HttpResponseNotAllowed(['GET'])
