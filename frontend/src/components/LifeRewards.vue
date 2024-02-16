@@ -8,7 +8,7 @@
       <ul>
         <li v-for="reward in rewards" :key="reward.id" class="reward-item" @click="openModalForReward(reward)">
           <div class="reward-title">{{ reward.name }}</div>
-          <div class="reward-cost">
+          <div class="reward-cost" @click.stop="spendReward(reward)">
             <i class="fas fa-heart pixelated-heart"></i>
             <div class="cost-amount">{{ formatCost(reward.cost) }}</div>
           </div>
@@ -16,23 +16,24 @@
       </ul>
     </div>
 
-    <!-- Modal for adding or viewing reward details -->
+    <!-- Modal for adding or editing reward details -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal-content">
-        <h2 class="form-title">{{ selectedReward ? 'Reward Details' : 'Add Reward' }}</h2>
-        <form @submit.prevent="selectedReward ? () => {} : addReward()">
+        <h2 class="form-title">{{ selectedReward ? 'Edit Reward' : 'Add Reward' }}</h2>
+        <form @submit.prevent="addOrUpdateReward">
           <label for="rewardName">Title*</label>
-          <input id="rewardName" v-model="newReward.name" placeholder="Add a title" required :disabled="selectedReward">
+          <input id="rewardName" v-model="rewardForm.name" placeholder="Add a title" required>
 
           <label for="rewardNotes">Notes</label>
-          <textarea id="rewardNotes" v-model="newReward.notes" placeholder="Add notes" :disabled="selectedReward"></textarea>
+          <textarea id="rewardNotes" v-model="rewardForm.notes" placeholder="Add notes"></textarea>
 
           <label for="rewardCost">Life Points*</label>
-          <input id="rewardCost" type="number" v-model.number="newReward.cost" placeholder="0" min="0" required :disabled="selectedReward">
+          <input id="rewardCost" type="number" v-model.number="rewardForm.cost" placeholder="0" min="0" required>
 
           <div class="modal-footer">
             <button type="button" @click="closeModal()">Cancel</button>
-            <button v-if="!selectedReward" type="submit">Add Reward</button>
+            <button type="submit">{{ selectedReward ? 'Update' : 'Add' }} Reward</button>
+            <!-- Only show the delete button when editing an existing reward -->
             <button v-if="selectedReward" type="button" class="delete-reward-btn" @click="showDeleteConfirmation(selectedReward.id)">Delete</button>
           </div>
         </form>
@@ -56,6 +57,7 @@
 
 <script>
 import { useRewardsStore } from '@/stores/useRewardsStore';
+import { useNotificationStore } from '@/stores/useNotificationStore';
 
 export default {
   name: 'LifeRewards',
@@ -63,7 +65,8 @@ export default {
     return {
       showModal: false,
       showDeleteConfirm: false,
-      newReward: {
+      rewardForm: {
+        id: null,
         name: '',
         notes: '',
         cost: 0,
@@ -74,7 +77,8 @@ export default {
   },
   computed: {
     rewards() {
-      return useRewardsStore().rewards.map(reward => ({
+      const rewardsStore = useRewardsStore();
+      return rewardsStore.rewards.map(reward => ({
         ...reward,
         cost: parseFloat(reward.cost),
       }));
@@ -82,16 +86,20 @@ export default {
   },
   methods: {
     resetForm() {
-      this.newReward = { name: '', notes: '', cost: 0 };
+      this.rewardForm = { id: null, name: '', notes: '', cost: 0 };
       this.selectedReward = null;
     },
-    async addReward() {
+    async addOrUpdateReward() {
       const rewardsStore = useRewardsStore();
       await rewardsStore.fetchCSRFToken();
-      const success = await rewardsStore.addReward(this.newReward);
-      if (success) {
-        this.closeModal();
+
+      if (this.selectedReward) {
+        await rewardsStore.updateReward(this.rewardForm);
+      } else {
+        await rewardsStore.addReward(this.rewardForm);
       }
+
+      this.closeModal();
     },
     openModalForNewReward() {
       this.resetForm();
@@ -100,7 +108,7 @@ export default {
     },
     openModalForReward(reward) {
       this.selectedReward = reward;
-      this.newReward = { ...reward, cost: reward.cost };
+      this.rewardForm = { ...reward };
       this.showModal = true;
     },
     showDeleteConfirmation(rewardId) {
@@ -108,13 +116,13 @@ export default {
       this.showDeleteConfirm = true;
     },
     async confirmDelete() {
+      const rewardsStore = useRewardsStore();
       if (this.rewardToDelete) {
-        const rewardsStore = useRewardsStore();
         await rewardsStore.deleteReward(this.rewardToDelete);
         this.showDeleteConfirm = false;
         this.rewardToDelete = null;
-        this.closeModal();
       }
+      this.closeModal();
     },
     cancelDelete() {
       this.showDeleteConfirm = false;
@@ -128,6 +136,45 @@ export default {
     formatCost(cost) {
       return Number.isInteger(cost) ? cost.toString() : cost.toFixed(2);
     },
+    async spendReward(reward) {
+      const rewardsStore = useRewardsStore();
+      try {
+        await rewardsStore.spendReward(reward.id, reward.cost);
+        rewardsStore.fetchRewards();
+      } catch (error) {
+        console.error("Error in spendReward method:", error);
+        const notificationStore = useNotificationStore();
+        notificationStore.addNotification("An error occurred while trying to spend Life Points.");
+      }
+    },
+    async addOrUpdateReward() {
+      const rewardsStore = useRewardsStore();
+      await rewardsStore.fetchCSRFToken();
+
+      if (this.selectedReward) {
+        try {
+          const success = await rewardsStore.updateReward(this.rewardForm);
+          if (success) {
+            const notificationStore = useNotificationStore();
+            notificationStore.addNotification(`Reward updated successfully.`);
+          }
+        } catch (error) {
+          console.error('Error updating reward:', error);
+        }
+      } else {
+        try {
+          const success = await rewardsStore.addReward(this.rewardForm);
+          if (success) {
+            const notificationStore = useNotificationStore();
+            notificationStore.addNotification(`Reward added successfully.`);
+          }
+        } catch (error) {
+          console.error('Error adding new reward:', error);
+        }
+      }
+
+      this.closeModal();
+    },
   },
   mounted() {
     const rewardsStore = useRewardsStore();
@@ -136,9 +183,6 @@ export default {
 };
 </script>
 
-
-
-  
 <style scoped>
 .life-rewards-container {
   min-height: 600px;

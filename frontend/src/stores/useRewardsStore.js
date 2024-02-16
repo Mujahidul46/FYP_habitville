@@ -111,7 +111,38 @@ export const useRewardsStore = defineStore('rewards', {
         notificationStore.addNotification("An error occurred while trying to delete the reward.");
       }
     },
+    async updateReward(updatedReward) {
+      try {
+        const response = await fetch(`http://localhost:8000/update-reward/${updatedReward.id}/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.csrfToken,
+          },
+          body: JSON.stringify({
+            name: updatedReward.name,
+            notes: updatedReward.notes,
+            cost: updatedReward.cost,
+          }),
+          credentials: 'include',
+        });
+        const responseData = await response.json();
+        const notificationStore = useNotificationStore();
 
-
+        if (response.ok) {
+          this.rewards = this.rewards.map(reward => 
+            reward.id === updatedReward.id ? { ...reward, ...responseData } : reward
+          );
+          notificationStore.addNotification(`Reward updated successfully.`);
+        } else {
+          console.error('Failed to update reward:', response.statusText);
+          notificationStore.addNotification(responseData.message);
+        }
+      } catch (error) {
+        console.error('Error updating reward:', error);
+        const notificationStore = useNotificationStore();
+        notificationStore.addNotification("An error occurred while trying to update the reward.");
+      }
+    },
   },
 });

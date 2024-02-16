@@ -344,3 +344,18 @@ def delete_reward_view(request: HttpRequest, pk: int) -> HttpResponse:
         return JsonResponse({'message': 'Reward deleted successfully'}, status=204)  
     else:
         return HttpResponseNotAllowed(['DELETE'])
+
+@csrf_exempt
+@login_required
+def update_reward_view(request: HttpRequest, pk: int) -> JsonResponse:
+    reward = get_object_or_404(Reward, pk=pk, user=request.user)
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        form = RewardForm(data, instance=reward)
+        if form.is_valid():
+            updated_reward = form.save()
+            return JsonResponse(updated_reward.to_dict(), status=200)
+        else:
+            return JsonResponse(form.errors, status=400)
+    else:
+        return HttpResponseNotAllowed(['PUT'])
