@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw, NavigationGuardNext, Ro
 
 import Dashboard from '../pages/Dashboard.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import VillageMap from '../components/VillageMap.vue';
 
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
@@ -9,6 +10,7 @@ let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/profile/', name: 'Profile Page', component: ProfilePage, meta: { requiresAuth: true } },
+    { path: '/village', name: 'VillageMap', component: VillageMap, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

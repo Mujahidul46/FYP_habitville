@@ -11,6 +11,14 @@
               active-class="nav-link-active"
             >Habit Tracker</router-link>
           </li>
+          <!-- Village button -->
+          <li class="nav-item">
+            <router-link
+              to="/village"
+              class="btn btn-outline-light m-2"
+              active-class="nav-link-active"
+            >Village</router-link>
+          </li>
           <!-- Profile Page button -->
           <li class="nav-item">
             <router-link
@@ -54,6 +62,7 @@
     <RouterView></RouterView>
   </main>
 </template>
+
 
 
 
@@ -109,7 +118,7 @@ body, html {
 }
 
 .navbar-custom {
-    background-color: #4CAF50;
+    background-color: #646464;
     display: flex;
     justify-content: space-between; 
     align-items: center;
@@ -164,7 +173,7 @@ body, html {
 
 main {
     flex: 1;
-    background-color: #65dc6f;
+    background-color: #e4e4e4;
 }
 
 .footer-custom {
