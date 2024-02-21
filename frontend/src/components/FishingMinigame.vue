@@ -10,6 +10,9 @@ export default {
     return {
       game: null,
       fisherman: null,
+      lineGraphics: null,
+      isFishing: false,
+      tooFarWarningText: null,
     };
   },
   mounted() {
@@ -52,6 +55,13 @@ export default {
         frameHeight: 48,
       });
 
+      // Load the fisherman fishing animation spritesheet
+      this.load.spritesheet('fisherman_fishing', '/fishing_minigame_assets/1 Fisherman/Fisherman_fish_no_line.png', {
+          frameWidth: 48,
+          frameHeight: 48,
+      });
+
+      // Load the fishing spot image (whirlpool)
       this.load.image('fishingSpot', '/fishing_minigame_assets/3 Objects/fishing_spot.png');
     }
 
@@ -102,6 +112,27 @@ export default {
       // Idle animation
       this.anims.create({ key: 'idle', frames: this.anims.generateFrameNumbers('fisherman_idle', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
 
+      // Fishing animation
+      this.anims.create({
+          key: 'fishing',
+          frames: this.anims.generateFrameNumbers('fisherman_fishing', { start: 0, end: 3 }),
+          frameRate: 2,
+          repeat: -1
+      });
+
+      // Fishing line
+      this.lineGraphics = this.add.graphics({ lineStyle: { width: 2, color: 0x0000ff } });
+
+      // Initialize tooFarWarningText
+      this.tooFarWarningText = this.add.text(0, 0, "I'm too far away from that spot!", {
+        fontFamily: 'Arial',
+        fontSize: '30px',
+        fill: '#ffffff',
+        align: 'center',
+      }).setOrigin(0.5, 1).setVisible(false);
+
+
+
       // Fishing spots
       const originalSpotLocations = map.getObjectLayer('fishingSpots').objects.slice();
 
@@ -110,27 +141,96 @@ export default {
 
       const addSpot = () => {
         if (this.fishingSpotsActive.length < 10) {
-            if (fishingSpotLocations.length === 0) {
-                // Refill and shuffle the locations from the original spots
-                fishingSpotLocations.push(...Phaser.Utils.Array.Shuffle(originalSpotLocations.slice()));
+          if (fishingSpotLocations.length === 0) {
+            // Refill and shuffle the locations from the original spots
+            fishingSpotLocations.push(...Phaser.Utils.Array.Shuffle(originalSpotLocations.slice()));
+          }
+          const spotLocation = fishingSpotLocations.pop(); // Get and remove a location from the array
+          const spot = this.physics.add.sprite(spotLocation.x, spotLocation.y, 'fishingSpot').setInteractive();
+
+          spot.on('pointerdown', () => {
+            // Get distance between the fisherman and the fisjing spot
+            const distance = Phaser.Math.Distance.Between(this.fisherman.x, this.fisherman.y, spot.x, spot.y);
+
+            const maxCastingDistance = 200;
+
+            // Checks if fisherman is too far from the fishing spot
+            if (distance > maxCastingDistance) {
+              const messages = [
+                "Oops, a bit too far for me.",
+                "Need to close in on the spot.",
+                "Distance is too great for a good cast.",
+                "No way I'm reaching that from here.",
+                "Not within casting range!",
+                "I should try stepping forward.",
+                "A few steps closer and I can cast.",
+                "Even with a super stretchy arm, I couldn't reach that!",
+                "My fishing line isn't made of rubber bands, you know.",
+                "Is this what they meant by 'long-distance relationship'?",
+                "I'd need a fishing drone to reach that spot.",
+                "Trying to cast that far is a bigger fantasy than my fishing skills."
+            ];
+
+                const randomMessage = Phaser.Utils.Array.GetRandom(messages);
+
+                if (this.warningText) {
+                    this.warningText.destroy(); // Destroy existing message if exists
+                }
+
+                this.tooFarWarningText.setText(randomMessage);
+
+                this.tooFarWarningText.setPosition(this.cameras.main.scrollX + this.cameras.main.width / 2, this.cameras.main.scrollY + 50);
+                this.tooFarWarningText.setDepth(100);
+                console.log("Attempting to show text message");
+                this.tooFarWarningText.setVisible(true);
+
+                // Hide the text after 3 seconds
+                this.time.delayedCall(3000, () => {
+                    this.tooFarWarningText.setVisible(false);
+                });
+
+                return;
             }
-            const spotLocation = fishingSpotLocations.pop(); // Get and remove a location from the array
-            const spot = this.physics.add.sprite(spotLocation.x, spotLocation.y, 'fishingSpot').setInteractive();
 
-            spot.on('pointerdown', () => console.log('Fish spot clicked'));
-            this.fishingSpotsActive.push(spot);
+            this.isFishing = true;
 
-            // Generate a random delay between 10 and 20 seconds
-            const randomDelay = Phaser.Math.Between(10000, 20000);
+            // Get direction to face based on the fishing spot's location
+            if (spot.x > this.fisherman.x) {
+              // face right
+              this.fisherman.flipX = false;
+            } else {
+              // face left
+              this.fisherman.flipX = true;
+            }
+            this.lineGraphics.clear();
 
-            this.time.delayedCall(randomDelay, () => {
-                spot.destroy();
-                this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
-                addSpot(); // Add new spot continuously
-            });
+            // Calculate the offset based on the fisherman's facing direction
+            let offsetX = this.fisherman.flipX ? -19 : 19;
+            let offsetY = 2;
+
+            this.lineGraphics.lineStyle(2, 0x0000ff, 1);
+            this.lineGraphics.beginPath();
+            this.lineGraphics.moveTo(this.fisherman.x + offsetX, this.fisherman.y + offsetY);
+            this.lineGraphics.lineTo(spot.x, spot.y);
+            this.lineGraphics.closePath();
+            this.lineGraphics.strokePath();
+
+            this.fisherman.anims.play('fishing');
+          });
+          this.fishingSpotsActive.push(spot);
+
+          // Generate a random delay between 10 and 20 seconds
+          const randomDelay = Phaser.Math.Between(10000, 20000);
+
+          this.time.delayedCall(randomDelay, () => {
+            spot.destroy();
+            this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
+            addSpot(); // Add new spot continuously
+          });
         }
-    };
-      // Initialize spots
+      };
+
+
       Array.from({ length: 10 }).forEach(addSpot);
 
 
@@ -140,6 +240,14 @@ export default {
       let velocityX = 0;
       let velocityY = 0;
       const speed = 130;
+
+      // Check for user movement input
+      if (this.cursors.left.isDown || this.WASDKeys.left.isDown || this.cursors.right.isDown || this.WASDKeys.right.isDown || this.cursors.up.isDown || this.WASDKeys.up.isDown || this.cursors.down.isDown || this.WASDKeys.down.isDown) {
+        if(this.isFishing) {
+          this.lineGraphics.clear();
+          this.isFishing = false; // fishing state is reset
+        }
+      }
 
       if (this.cursors.left.isDown || this.WASDKeys.left.isDown) {
         velocityX -= speed;
@@ -152,9 +260,9 @@ export default {
       }
 
       if (this.cursors.up.isDown || this.WASDKeys.up.isDown) {
-        velocityY -= speed;
+        velocityY -= speed;  
       } else if (this.cursors.down.isDown || this.WASDKeys.down.isDown) {
-        velocityY += speed;
+        velocityY += speed; 
       }
 
       // Normalize the velocity vector if moving diagonally (so speed is correct)
@@ -165,12 +273,26 @@ export default {
 
       this.fisherman.setVelocity(velocityX, velocityY);
 
-      if (velocityX !== 0 || velocityY !== 0) {
-        this.fisherman.anims.play('walking', true);
-      } else {
-        // Plays idle animation when the fisherman is not moving
-        this.fisherman.anims.play('idle', true);
+      // Update the position of tooFarWarningText based on the fisherman's position
+      if (this.tooFarWarningText.visible) {
+        // counteract zoom effect so text is not low quality
+        const scale = 1 / this.cameras.main.zoom;
+        this.tooFarWarningText.setScale(scale);
+
+        const textOffsetY = -40;
+        this.tooFarWarningText.x = this.fisherman.x;
+        this.tooFarWarningText.y = this.fisherman.y + textOffsetY * scale;
       }
+
+      if (!this.isFishing){
+        if (velocityX !== 0 || velocityY !== 0) {
+          this.fisherman.anims.play('walking', true);
+        } else {
+          // Plays idle animation when the fisherman is not moving
+          this.fisherman.anims.play('idle', true);
+        }
+      }
+
     }
   },
   beforeUnmount() {
