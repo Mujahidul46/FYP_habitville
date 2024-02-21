@@ -51,6 +51,8 @@ export default {
         frameWidth: 48,
         frameHeight: 48,
       });
+
+      this.load.image('fishingSpot', '/fishing_minigame_assets/3 Objects/fishing_spot.png');
     }
 
     function create() {
@@ -70,18 +72,13 @@ export default {
       const grassLayer = map.createLayer('grass', tileset, 0, 0);
       const waterLayer = map.createLayer('water', waterTileset, 0, 0);
       const treesLayer = map.createLayer('trees', tileset, 0, 0);
-
-
-
+      
       // Collision for water tiles and fisherman
       waterLayer.setCollisionByProperty({ isWater: true });
-
-      // Adds the fisherman sprite to the game
       this.fisherman = this.physics.add.sprite(100, 100, 'fisherman', 0);
-
       this.fisherman.body.setSize(30, 35, false);
       this.fisherman.body.setOffset(0, 13);
-      
+
       // Set the world bounds to match the size of this map
       this.physics.world.bounds.width = map.widthInPixels;
       this.physics.world.bounds.height = map.heightInPixels;
@@ -100,20 +97,43 @@ export default {
       this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
       // Walking animation
-      this.anims.create({
-        key: 'walking',
-        frames: this.anims.generateFrameNumbers('fisherman', { start: 0, end: 5 }),
-        frameRate: 10,
-        repeat: -1
-      });
+      this.anims.create({ key: 'walking', frames: this.anims.generateFrameNumbers('fisherman', { start: 0, end: 5 }), frameRate: 10, repeat: -1 });
 
       // Idle animation
-      this.anims.create({
-        key: 'idle',
-        frames: this.anims.generateFrameNumbers('fisherman_idle', { start: 0, end: 3 }),
-        frameRate: 5,
-        repeat: -1
-      });
+      this.anims.create({ key: 'idle', frames: this.anims.generateFrameNumbers('fisherman_idle', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
+
+      // Fishing spots
+      const originalSpotLocations = map.getObjectLayer('fishingSpots').objects.slice();
+
+      const fishingSpotLocations = Phaser.Utils.Array.Shuffle(originalSpotLocations.slice()); // Clone and shuffle spots
+      this.fishingSpotsActive = [];
+
+      const addSpot = () => {
+        if (this.fishingSpotsActive.length < 10) {
+            if (fishingSpotLocations.length === 0) {
+                // Refill and shuffle the locations from the original spots
+                fishingSpotLocations.push(...Phaser.Utils.Array.Shuffle(originalSpotLocations.slice()));
+            }
+            const spotLocation = fishingSpotLocations.pop(); // Get and remove a location from the array
+            const spot = this.physics.add.sprite(spotLocation.x, spotLocation.y, 'fishingSpot').setInteractive();
+
+            spot.on('pointerdown', () => console.log('Fish spot clicked'));
+            this.fishingSpotsActive.push(spot);
+
+            // Generate a random delay between 10 and 20 seconds
+            const randomDelay = Phaser.Math.Between(10000, 20000);
+
+            this.time.delayedCall(randomDelay, () => {
+                spot.destroy();
+                this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
+                addSpot(); // Add new spot continuously
+            });
+        }
+    };
+      // Initialize spots
+      Array.from({ length: 10 }).forEach(addSpot);
+
+
     }
 
     function update() {
