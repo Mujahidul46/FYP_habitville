@@ -13,6 +13,7 @@ export default {
       lineGraphics: null,
       isFishing: false,
       tooFarWarningText: null,
+      currentFishingSpot: null,
     };
   },
   mounted() {
@@ -61,8 +62,11 @@ export default {
           frameHeight: 48,
       });
 
-      // Load the fishing spot image (whirlpool)
-      this.load.image('fishingSpot', '/fishing_minigame_assets/3 Objects/fishing_spot.png');
+      // Load the fishing spot inactive image (fish has not bit)
+      this.load.image('fishingSpotInactive', '/fishing_minigame_assets/3 Objects/fishing_spot_inactive.png');
+
+      // Load the fishing spot active image (fish HAS bit)
+      this.load.image('fishingSpotActive', '/fishing_minigame_assets/3 Objects/fishing_spot_active.png');
     }
 
     function create() {
@@ -146,9 +150,12 @@ export default {
             fishingSpotLocations.push(...Phaser.Utils.Array.Shuffle(originalSpotLocations.slice()));
           }
           const spotLocation = fishingSpotLocations.pop(); // Get and remove a location from the array
-          const spot = this.physics.add.sprite(spotLocation.x, spotLocation.y, 'fishingSpot').setInteractive();
+          const spot = this.physics.add.sprite(spotLocation.x, spotLocation.y, 'fishingSpotInactive').setInteractive();
+
+          let biteTimer;
 
           spot.on('pointerdown', () => {
+            console.log("Fishing spot clicked.");
             // Get distance between the fisherman and the fisjing spot
             const distance = Phaser.Math.Distance.Between(this.fisherman.x, this.fisherman.y, spot.x, spot.y);
 
@@ -192,7 +199,12 @@ export default {
                 return;
             }
 
+            console.log("Starting fishing. Waiting for fish to bite...");
             this.isFishing = true;
+            this.currentFishingSpot = spot;
+            spot.setTexture('fishingSpotInactive');
+
+            startBiteTimer(spot);
 
             // Get direction to face based on the fishing spot's location
             if (spot.x > this.fisherman.x) {
@@ -221,19 +233,67 @@ export default {
 
           // Generate a random delay between 10 and 20 seconds
           const randomDelay = Phaser.Math.Between(10000, 20000);
-
           this.time.delayedCall(randomDelay, () => {
-            spot.destroy();
+            if (biteTimer) {
+              console.log("Bite timer removed or expired.");
+              biteTimer.remove();
+            }
+            if (spot.active) {
+              spot.destroy();
+              if (this.currentFishingSpot === spot) {
+                console.log("Fishing spot disappeared. Leaving fishing state.");
+                this.isFishing = false; // Reset fishing state as spot the player was fishing has disappeared
+                this.currentFishingSpot = null;
+                if (this.lineGraphics) {
+                  this.lineGraphics.clear();
+                }
+              }
+            }
             this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
-            addSpot(); // Add new spot continuously
+            addSpot.call(this); // Add new spot continuously
           });
         }
       };
+      const startBiteTimer = (spot) => {
+        const initiateBite = () => {
+            if (!spot || !spot.active) {
+                console.log("Spot is no longer active or has been destroyed.");
+                return; // Early return if the spot is inactive or destroyed
+            }
+            console.log("Fish is about to bite.");
+            spot.setTexture('fishingSpotActive');
 
+            const exclamation = this.add.text(spot.x, spot.y - 10, '!', {
+                fontFamily: 'Arial',
+                fontSize: '64px',
+                fill: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 6,
+            }).setOrigin(0.5, 1).setDepth(101);
 
+            let exclamationTimeout = this.time.delayedCall(2000, () => {
+                exclamation.destroy();
+                if (spot.active) {
+                    console.log("Missed the bite. Waiting for the next bite.");
+                    spot.setTexture('fishingSpotInactive');
+                    spot.disableInteractive();
+                    startBiteTimer(spot); // reset timer to give player another chance
+                }
+            });
+
+            spot.setInteractive().once('pointerdown', () => {
+                console.log("Caught the fish!");
+                exclamation.destroy();
+                exclamationTimeout.remove();
+                spot.disableInteractive();
+                // need to add successful fishing here (phase 1 of minigame)
+            });
+        };
+
+        // Delay before the fish bites again, 2-8 seconds
+        spot.biteTimer = this.time.delayedCall(Phaser.Math.Between(2000, 8000), initiateBite);
+      };
       Array.from({ length: 10 }).forEach(addSpot);
-
-
     }
 
     function update() {
@@ -244,8 +304,20 @@ export default {
       // Check for user movement input
       if (this.cursors.left.isDown || this.WASDKeys.left.isDown || this.cursors.right.isDown || this.WASDKeys.right.isDown || this.cursors.up.isDown || this.WASDKeys.up.isDown || this.cursors.down.isDown || this.WASDKeys.down.isDown) {
         if(this.isFishing) {
+          console.log("Player moved. Resetting fishing state.");
           this.lineGraphics.clear();
           this.isFishing = false; // fishing state is reset
+        }
+
+        // Check if there's a current fishing spot with an active timer (i.e. player fishing it)
+        if (this.currentFishingSpot && this.currentFishingSpot.biteTimer) {
+          console.log("Resetting bite timer due to player movement.");
+          if (this.currentFishingSpot.active) {
+              this.currentFishingSpot.biteTimer.remove();
+              this.currentFishingSpot.setTexture('fishingSpotInactive'); // change the image to one with less ripples
+          }
+          this.currentFishingSpot.biteTimer = null;
+          this.currentFishingSpot = null;
         }
       }
 
