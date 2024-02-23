@@ -1,9 +1,19 @@
 <template>
   <div id="fishing-minigame-container"></div>
+  <div id="fullscreen-toggle-container">
+    <button @click="toggleFullscreen">
+      <i class="fas fa-expand-arrows-alt"></i> Fullscreen
+    </button>
+    <div class="button-spacing"></div>
+    <button @click="goBackToVillage">
+      Go Back to Village
+    </button>
+  </div>
 </template>
 
 <script>
 import Phaser from 'phaser';
+import { useRouter } from 'vue-router';
 
 export default {
   data() {
@@ -14,14 +24,19 @@ export default {
       isFishing: false,
       tooFarWarningText: null,
       currentFishingSpot: null,
+      currentExclamation: null,
     };
+  },
+  setup() {
+    const router = useRouter();
+    return {};
   },
   mounted() {
     var config = {
       type: Phaser.AUTO,
       parent: 'fishing-minigame-container',
-      width: 1920,
-      height: 976,
+      width: window.innerWidth,
+      height: window.innerHeight,
       pixelArt: true,
       physics: {
         default: 'arcade',
@@ -29,6 +44,11 @@ export default {
           gravity: { y: 0 },
           debug: false
         }
+      },
+      scale: {
+      mode: Phaser.Scale.RESIZE,
+      parent: 'fishing-minigame-container',
+      autoCenter: Phaser.Scale.CENTER_BOTH,
       },
       scene: {
         preload: preload,
@@ -106,7 +126,7 @@ export default {
 
       // Camera that follows the fisherman
       this.cameras.main.startFollow(this.fisherman, true, 0.5, 0.5);
-      this.cameras.main.setZoom(3); // Adjust the zoom level as needed
+      this.cameras.main.setZoom(4); // Adjust the zoom level as needed (1=full map, change back to 3 if anything breaks)
 
       this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
@@ -135,8 +155,6 @@ export default {
         align: 'center',
       }).setOrigin(0.5, 1).setVisible(false);
 
-
-
       // Fishing spots
       const originalSpotLocations = map.getObjectLayer('fishingSpots').objects.slice();
 
@@ -156,6 +174,12 @@ export default {
 
           spot.on('pointerdown', () => {
             console.log("Fishing spot clicked.");
+
+            // cant fish two spots in one go
+            if (this.currentFishingSpot && this.currentFishingSpot !== spot) {
+              this.resetFishingInteraction();
+            }
+
             // Get distance between the fisherman and the fisjing spot
             const distance = Phaser.Math.Distance.Between(this.fisherman.x, this.fisherman.y, spot.x, spot.y);
 
@@ -263,7 +287,7 @@ export default {
             console.log("Fish is about to bite.");
             spot.setTexture('fishingSpotActive');
 
-            const exclamation = this.add.text(spot.x, spot.y - 10, '!', {
+            this.currentExclamation = this.add.text(spot.x, spot.y+40, '!', {
                 fontFamily: 'Arial',
                 fontSize: '64px',
                 fill: '#ffffff',
@@ -271,23 +295,57 @@ export default {
                 strokeThickness: 6,
             }).setOrigin(0.5, 1).setDepth(101);
 
+
             let exclamationTimeout = this.time.delayedCall(2000, () => {
-                exclamation.destroy();
-                if (spot.active) {
-                    console.log("Missed the bite. Waiting for the next bite.");
-                    spot.setTexture('fishingSpotInactive');
-                    spot.disableInteractive();
-                    startBiteTimer(spot); // reset timer to give player another chance
-                }
+              if (this.currentExclamation) {
+                this.currentExclamation.destroy();
+                this.currentExclamation = null;
+              }
+              if (spot.active) {
+                  console.log("Missed the bite. Waiting for the next bite.");
+                  spot.setTexture('fishingSpotInactive');
+                  spot.disableInteractive();
+                  startBiteTimer.call(this, spot); // reset timer to give player another chance
+              }
             });
 
             spot.setInteractive().once('pointerdown', () => {
                 console.log("Caught the fish!");
-                exclamation.destroy();
+                if (this.currentExclamation) {
+                  this.currentExclamation.destroy();
+                  this.currentExclamation = null;
+                }
+                
                 exclamationTimeout.remove();
                 spot.disableInteractive();
                 // need to add successful fishing here (phase 1 of minigame)
             });
+        };
+
+        // Reset previous fishing interaction
+        this.resetFishingInteraction = () => {
+          if (this.currentExclamation) {
+            this.currentExclamation.destroy();
+            this.currentExclamation = null;
+          }
+          if (this.currentFishingSpot) {
+            this.currentFishingSpot.setTexture('fishingSpotInactive');
+            this.currentFishingSpot.disableInteractive();
+            if (this.currentFishingSpot.biteTimer) {
+              this.currentFishingSpot.biteTimer.remove();
+              this.currentFishingSpot.biteTimer = null;
+            }
+            this.currentFishingSpot = null;
+          }
+          if (this.lineGraphics) {
+            this.lineGraphics.clear();
+          }
+
+          this.fishingSpotsActive.forEach(spot => {
+            spot.setTexture('fishingSpotInactive'); // reset visually to image with less ripples
+            spot.setInteractive(); // Can interact again with spots 
+          });
+          this.isFishing = false;
         };
 
         // Delay before the fish bites again, 2-8 seconds
@@ -350,11 +408,27 @@ export default {
         // counteract zoom effect so text is not low quality
         const scale = 1 / this.cameras.main.zoom;
         this.tooFarWarningText.setScale(scale);
+        
 
         const textOffsetY = -40;
         this.tooFarWarningText.x = this.fisherman.x;
         this.tooFarWarningText.y = this.fisherman.y + textOffsetY * scale;
       }
+
+      if (this.currentExclamation && this.currentExclamation.visible) {
+          const exclamationScale = 1 / this.cameras.main.zoom;
+          this.currentExclamation.setScale(exclamationScale);
+
+          if (this.currentFishingSpot) {
+              const exclamationOffsetX = 0;
+              const exclamationOffsetY = -50;
+              this.currentExclamation.x = this.currentFishingSpot.x + exclamationOffsetX * exclamationScale;
+              this.currentExclamation.y = this.currentFishingSpot.y + exclamationOffsetY * exclamationScale;
+          } else {
+              console.log("currentFishingSpot is null, cannot update exclamation mark position.");
+              this.currentExclamation.setVisible(false);
+          }
+        }
 
       if (!this.isFishing){
         if (velocityX !== 0 || velocityY !== 0) {
@@ -367,6 +441,35 @@ export default {
 
     }
   },
+  methods: {
+    toggleFullscreen() {
+      const container = document.getElementById('fishing-minigame-container');
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.mozRequestFullScreen) { /* Firefox */
+          container.mozRequestFullScreen();
+        } else if (container.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) { /* IE/Edge */
+          container.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+          document.msExitFullscreen();
+        }
+      }
+    },
+    goBackToVillage() {
+      this.$router.push({ name: 'VillageMap' });
+    },
+  },
   beforeUnmount() {
     console.log("Destroying Phaser game");
     if (this.game) {
@@ -378,11 +481,60 @@ export default {
 </script>
 
 <style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
 #fishing-minigame-container {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#fullscreen-toggle-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+}
+
+#fullscreen-toggle-container button {
+  background-color: #bfbfbf;
+  color: #333333;
+  border: 2px solid #dfdfdf;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  display: flex;
   align-items: center;
+  gap: 5px;
+}
+
+#fullscreen-toggle-container button:hover {
+  background-color: #adacac;
+  color: #000000;
+}
+
+button i {
+  margin-right: 5px;
+}
+
+.body {
+  overflow: hidden;
+  margin: 0;
+}
+
+.button-spacing {
+  margin-bottom: 10px;
 }
 </style>

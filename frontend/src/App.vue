@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-custom">
+  <nav class="navbar navbar-expand-lg navbar-custom" v-if="!isFullscreen">
       <span class="navbar-brand">Habitville</span>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
@@ -68,7 +68,7 @@
 
 <script>
 import { defineComponent, onMounted, computed } from 'vue';
-import { RouterView } from 'vue-router';
+import { RouterView, useRoute } from 'vue-router';
 import { useProfileStore } from '@/stores/useProfileStore';
 import Notification from '@/components/Notification.vue';
 import { useNotificationStore } from '@/stores/useNotificationStore';
@@ -78,7 +78,8 @@ export default defineComponent({
 
   setup() {
     const profileStore = useProfileStore();
-    const notificationStore = useNotificationStore(); 
+    const notificationStore = useNotificationStore();
+    const route = useRoute();
 
     onMounted(async () => {
       await profileStore.fetchUserProfile();
@@ -91,10 +92,13 @@ export default defineComponent({
       window.location.href = "http://localhost:8000/logout/";
     };
 
+    const isFullscreen = computed(() => route.meta.fullscreen);
+
     return {
       userProfile,
       notifications, 
       logout,
+      isFullscreen,
     };
   },
 });

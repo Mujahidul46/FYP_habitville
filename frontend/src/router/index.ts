@@ -12,8 +12,8 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/profile/', name: 'Profile Page', component: ProfilePage, meta: { requiresAuth: true } },
     { path: '/village', name: 'VillageMap', component: VillageMap, meta: { requiresAuth: true } },
-    { path: '/fishing-minigame', name: 'FishingMinigame', component: FishingMinigame, meta: { requiresAuth: true }
-      },
+    { path: '/fishing-minigame', name: 'FishingMinigame', component: FishingMinigame, meta: { requiresAuth: true, fullscreen: true } },
+
 ];
 
 const router = createRouter({
