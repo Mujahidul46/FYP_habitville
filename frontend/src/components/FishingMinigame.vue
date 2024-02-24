@@ -326,6 +326,7 @@ export default {
               if (spot.active) {
                   console.log("Missed the bite. Waiting for the next bite.");
                   spot.setTexture('fishingSpotInactive');
+                  this.clearMinigameGraphics();
                   spot.disableInteractive();
                   startBiteTimer.call(this, spot); // reset timer to give player another chance
               }
@@ -337,6 +338,7 @@ export default {
                   this.currentExclamation = null;
                 }  
                 exclamationTimeout.remove();
+                this.clearMinigameGraphics();
                 spot.disableInteractive();
                 // start minigame
                 startTimingMinigame.call(this);
@@ -404,7 +406,7 @@ export default {
               this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== this.currentFishingSpot);
               this.currentFishingSpot = null;
             }
-            this.resetFishingInteraction();   
+            this.resetFishingInteraction();
           });
 
         // Reset previous fishing interaction
