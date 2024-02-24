@@ -25,6 +25,8 @@ export default {
       tooFarWarningText: null,
       currentFishingSpot: null,
       currentExclamation: null,
+      timingBarMovingUp: true,
+      barYPosition: window.innerHeight / 2,
     };
   },
   setup() {
@@ -173,6 +175,10 @@ export default {
           let biteTimer;
 
           spot.on('pointerdown', () => {
+            if (this.isFishing) {
+              console.log("Minigame is active. Ignoring additional clicks on spots.");
+              return; // Early exit if a minigame is already active
+            }
             console.log("Fishing spot clicked.");
 
             // cant fish two spots in one go
@@ -180,7 +186,7 @@ export default {
               this.resetFishingInteraction();
             }
 
-            // Get distance between the fisherman and the fisjing spot
+            // Get distance between the fisherman and the fishing spot
             const distance = Phaser.Math.Distance.Between(this.fisherman.x, this.fisherman.y, spot.x, spot.y);
 
             const maxCastingDistance = 200;
@@ -225,6 +231,7 @@ export default {
 
             console.log("Starting fishing. Waiting for fish to bite...");
             this.isFishing = true;
+            this.disableAllFishingSpots();
             this.currentFishingSpot = spot;
             spot.setTexture('fishingSpotInactive');
 
@@ -253,6 +260,20 @@ export default {
 
             this.fisherman.anims.play('fishing');
           });
+
+          // disable interaction on all fishing spots
+          this.disableAllFishingSpots = () => {
+            this.fishingSpotsActive.forEach(spot => {
+                spot.disableInteractive();
+            });
+          };
+
+          // enable interaction on all fishing spots
+          this.enableAllFishingSpots = () => {
+              this.fishingSpotsActive.forEach(spot => {
+                  spot.setInteractive();
+              });
+          };
           this.fishingSpotsActive.push(spot);
 
           // Generate a random delay between 10 and 20 seconds
@@ -262,20 +283,21 @@ export default {
               console.log("Bite timer removed or expired.");
               biteTimer.remove();
             }
+            // Check if the spot is currently active
             if (spot.active) {
-              spot.destroy();
-              if (this.currentFishingSpot === spot) {
-                console.log("Fishing spot disappeared. Leaving fishing state.");
-                this.isFishing = false; // Reset fishing state as spot the player was fishing has disappeared
-                this.currentFishingSpot = null;
-                if (this.lineGraphics) {
-                  this.lineGraphics.clear();
-                }
+              // Check if the minigame is not active or if the clicked spot is different from the one currently in use
+              if (!this.isFishing || this.currentFishingSpot !== spot) {
+                spot.destroy();
+                console.log("Fishing spot destroyed due to inactivity or player engagement elsewhere.");
+                // Remove the destroyed spot from the active spots list by filtering
+                this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
+              } else {
+                console.log("Fishing spot remains active due to ongoing minigame.");
               }
             }
-            this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== spot);
             addSpot.call(this); // Add new spot continuously
           });
+
         }
       };
       const startBiteTimer = (spot) => {
@@ -310,17 +332,80 @@ export default {
             });
 
             spot.setInteractive().once('pointerdown', () => {
-                console.log("Caught the fish!");
                 if (this.currentExclamation) {
                   this.currentExclamation.destroy();
                   this.currentExclamation = null;
-                }
-                
+                }  
                 exclamationTimeout.remove();
                 spot.disableInteractive();
-                // need to add successful fishing here (phase 1 of minigame)
+                // start minigame
+                startTimingMinigame.call(this);
             });
         };
+
+        this.clearMinigameGraphics = () => {
+          if (this.timingBar) {
+              this.timingBar.clear();
+              this.timingBar.destroy();
+              this.timingBar = null;
+          }
+          if (this.greenStrip) {
+              this.greenStrip.clear();
+              this.greenStrip.destroy();
+              this.greenStrip = null;
+          }
+          if (this.yellowBar) {
+              this.yellowBar.clear();
+              this.yellowBar.destroy();
+              this.yellowBar = null;
+          }
+        };
+
+
+        this.checkMinigameSuccess = () => {
+            if (this.randomGreenStripStartY === undefined) {
+              console.error("randomGreenStripStartY is not defined yet.");
+              return false;
+            }
+  
+            const yellowBarTop = this.yellowBarYPosition;
+            const yellowBarBottom = this.yellowBarYPosition + 20;
+            const greenStripTop = this.randomGreenStripStartY;
+            const greenStripBottom = this.randomGreenStripStartY + 50;
+            
+            console.log(`Yellow Bar: Top=${yellowBarTop}, Bottom=${yellowBarBottom}`);
+            console.log(`Green Strip: Top=${greenStripTop}, Bottom=${greenStripBottom}`);
+
+            //return yellowBarBottom >= greenStripTop && yellowBarTop <= greenStripBottom; // yellow bar doesnt have to be FULLY inside
+            return yellowBarTop >= greenStripTop && yellowBarBottom <= greenStripBottom; // yellow bar has to be FULLY inside
+          };
+
+          this.input.on('pointerdown', () => {
+            if (!this.isFishing || !this.greenStrip || !this.yellowBar) return;
+
+            const success = this.checkMinigameSuccess();
+            if (success) {
+                console.log("User won the minigame");
+            } else {
+                console.log("User lost minigame");
+            }
+            this.enableAllFishingSpots();
+  
+            // Clear the graphics and reset the minigame state
+            this.clearMinigameGraphics();
+            this.isFishing = false;
+            this.lineGraphics.clear();
+
+            // destroy the current fishing spot after the minigame is over
+            if (this.currentFishingSpot && this.currentFishingSpot.active) {
+              this.currentFishingSpot.destroy();
+              console.log("Current fishing spot destroyed after minigame conclusion.");
+              // Remove destroyed spot from the active spots list
+              this.fishingSpotsActive = this.fishingSpotsActive.filter(activeSpot => activeSpot !== this.currentFishingSpot);
+              this.currentFishingSpot = null;
+            }
+            this.resetFishingInteraction();   
+          });
 
         // Reset previous fishing interaction
         this.resetFishingInteraction = () => {
@@ -347,6 +432,57 @@ export default {
           });
           this.isFishing = false;
         };
+
+        
+
+        const startTimingMinigame = () => {
+          const offsetX = 100; // used to move bars slightly to right
+          const viewportCenterX = this.cameras.main.worldView.x + this.cameras.main.worldView.width / 2 + offsetX;
+
+          const viewportCenterY = this.cameras.main.worldView.y + this.cameras.main.worldView.height / 2;
+
+          this.barYPosition = viewportCenterY - 100;
+
+          this.timingBar = this.add.graphics({ fillStyle: { color: 0x0000ff } });
+          this.timingBar.fillRect(viewportCenterX - 5, this.barYPosition, 10, 200);
+
+          const blueBarStartY = this.barYPosition;
+          const blueBarEndY = this.barYPosition + 200;
+          const greenStripHeight = 50;
+          const maxGreenStripStartY = blueBarEndY - greenStripHeight;
+
+          this.randomGreenStripStartY = Phaser.Math.Between(blueBarStartY, maxGreenStripStartY);
+
+          this.greenStrip = this.add.graphics({ fillStyle: { color: 0x00ff00 } });
+          this.greenStrip.fillRect(viewportCenterX - 5, this.randomGreenStripStartY, 10, greenStripHeight);
+
+          // Create the moving yellow bar
+          this.yellowBar = this.add.graphics({ fillStyle: { color: 0xffff00 } });
+          this.yellowBarYPosition = Phaser.Math.Between(this.barYPosition + 10, maxGreenStripStartY - 30);
+          this.yellowBar.fillRect(viewportCenterX - 5, this.yellowBarYPosition, 10, 20);
+      };
+
+      this.updateMinigame = () => {
+        const speed = 2; // make this randomised later
+
+        if (this.timingBarMovingUp) {
+            this.yellowBarYPosition -= speed;
+        } else {
+            this.yellowBarYPosition += speed;
+        }
+
+        if (this.yellowBarYPosition <= this.barYPosition || this.yellowBarYPosition + 20 >= this.barYPosition + 200) {
+            this.timingBarMovingUp = !this.timingBarMovingUp;
+        }
+
+        const offsetX = 100; // has to be same offset as used in startTimingMinigame
+        const viewportCenterX = this.cameras.main.worldView.x + this.cameras.main.worldView.width / 2 + offsetX;
+
+        if (this.yellowBar) {
+            this.yellowBar.clear();
+            this.yellowBar.fillRect(viewportCenterX - 5, this.yellowBarYPosition, 10, 20);
+        }
+      };
 
         // Delay before the fish bites again, 2-8 seconds
         spot.biteTimer = this.time.delayedCall(Phaser.Math.Between(2000, 8000), initiateBite);
@@ -437,6 +573,10 @@ export default {
           // Plays idle animation when the fisherman is not moving
           this.fisherman.anims.play('idle', true);
         }
+      }
+
+      if (this.isFishing) {
+          this.updateMinigame();
       }
 
     }
