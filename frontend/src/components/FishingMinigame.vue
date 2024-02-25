@@ -27,6 +27,8 @@ export default {
       currentExclamation: null,
       timingBarMovingUp: true,
       barYPosition: window.innerHeight / 2,
+      successMessageText: null,
+      failMessageText: null,
     };
   },
   setup() {
@@ -156,6 +158,45 @@ export default {
         fill: '#ffffff',
         align: 'center',
       }).setOrigin(0.5, 1).setVisible(false);
+
+      // Initialize successMessageText
+      this.successMessageText = this.add.text(0, 0, "You caught a fish!", {
+        fontFamily: 'Arial',
+        fontSize: '30px',
+        fill: '#ff0',
+        align: 'center',
+      }).setOrigin(0.5, 1).setVisible(false);
+
+      const successMessages = [
+        "With reflexes like these, I'm certain I was a cat in my past life...",
+        "Wow! A beautiful rainbow trout!",
+        "Yes! It's a hefty bass!",
+        "Wow! A rare golden carp!",
+        "Amazing catch! That's a big one!",
+        "I've got skill, that's a fine salmon!",
+        "Incredible! I caught a mythical koi!",
+        "What a catch! A swift and sleek pike!",
+        "I've got a giant catfish!",
+        "Spectacular! A vibrant and colorful parrotfish!",
+        "I did it! That's a rare and elusive sturgeon!",
+        "Just a regular old perch, but every catch counts!",
+        "Ah, a common carp. It's no trophy, but fishing is fishing.",
+        "A small trout. Not the biggest fish in the sea, but it's a start.",
+        "Managed to snag a little bream. It's all about patience.",
+        "A modest-sized bass. That was fun to catch!",
+        "Caught a tiny catfish. It's cute, in a slimy, whiskered way.",
+        "An average-sized pike. Not the monster of the lake, but it put up a good fight.",
+        "A little sunfish. It's no giant, but it sure is sunny."
+      ];
+
+      // Initialize failMessageText
+      this.failMessageText = this.add.text(0, 0, "The fish got away!", {
+        fontFamily: 'Arial',
+        fontSize: '30px',
+        fill: '#f00',
+        align: 'center',
+      }).setOrigin(0.5, 1).setVisible(false);
+
 
       // Fishing spots
       const originalSpotLocations = map.getObjectLayer('fishingSpots').objects.slice();
@@ -387,9 +428,29 @@ export default {
 
             const success = this.checkMinigameSuccess();
             if (success) {
-                console.log("User won the minigame");
+              console.log("User won the minigame");
+              const randomSuccessMessage = Phaser.Utils.Array.GetRandom(successMessages);
+              // Display success message
+              if (this.successMessageText) {
+                this.successMessageText.setText(randomSuccessMessage);
+                this.successMessageText.setPosition(this.cameras.main.scrollX + this.cameras.main.width / 2, this.cameras.main.scrollY + 100);
+                this.successMessageText.setDepth(101);
+                this.successMessageText.setVisible(true);
+                this.time.delayedCall(3000, () => {
+                    this.successMessageText.setVisible(false);
+                });
+              }
             } else {
-                console.log("User lost minigame");
+              console.log("User lost minigame");
+              // Display fail message
+              if (this.failMessageText) {
+                  this.failMessageText.setPosition(this.cameras.main.scrollX + this.cameras.main.width / 2, this.cameras.main.scrollY + 100);
+                  this.failMessageText.setDepth(101);
+                  this.failMessageText.setVisible(true);
+                  this.time.delayedCall(3000, () => {
+                      this.failMessageText.setVisible(false);
+                  });
+              }
             }
             this.enableAllFishingSpots();
   
@@ -551,6 +612,24 @@ export default {
         const textOffsetY = -40;
         this.tooFarWarningText.x = this.fisherman.x;
         this.tooFarWarningText.y = this.fisherman.y + textOffsetY * scale;
+      }
+
+      // successfully catch fish test
+      if (this.successMessageText.visible) {
+        const scale = 1 / this.cameras.main.zoom;
+        this.successMessageText.setScale(scale);
+        const successTextOffsetY = -50;
+        this.successMessageText.x = this.fisherman.x - 5;
+        this.successMessageText.y = this.fisherman.y + successTextOffsetY * scale;
+      }
+
+      // fail to catch fish text
+      if (this.failMessageText.visible) {
+          const scale = 1 / this.cameras.main.zoom;
+          this.failMessageText.setScale(scale);
+          const failTextOffsetY = -50;
+          this.failMessageText.x = this.fisherman.x - 5;
+          this.failMessageText.y = this.fisherman.y + failTextOffsetY * scale;
       }
 
       if (this.currentExclamation && this.currentExclamation.visible) {
