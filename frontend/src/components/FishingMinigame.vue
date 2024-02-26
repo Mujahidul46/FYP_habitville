@@ -19,6 +19,7 @@ export default {
   data() {
     return {
       game: null,
+      backgroundMusic: null,
       fisherman: null,
       lineGraphics: null,
       isFishing: false,
@@ -36,6 +37,10 @@ export default {
     return {};
   },
   mounted() {
+    this.backgroundMusic = new Audio('/music/Sakura-Girl-Peach-chosic.com_.mp3');
+    this.backgroundMusic.loop = true;
+    this.backgroundMusic.play();
+
     var config = {
       type: Phaser.AUTO,
       parent: 'fishing-minigame-container',
@@ -138,7 +143,7 @@ export default {
       this.anims.create({ key: 'walking', frames: this.anims.generateFrameNumbers('fisherman', { start: 0, end: 5 }), frameRate: 10, repeat: -1 });
 
       // Idle animation
-      this.anims.create({ key: 'idle', frames: this.anims.generateFrameNumbers('fisherman_idle', { start: 0, end: 3 }), frameRate: 5, repeat: -1 });
+      this.anims.create({ key: 'idle', frames: this.anims.generateFrameNumbers('fisherman_idle', { start: 0, end: 3 }), frameRate: 2, repeat: -1 });
 
       // Fishing animation
       this.anims.create({
@@ -695,6 +700,10 @@ export default {
     console.log("Destroying Phaser game");
     if (this.game) {
       this.game.destroy(true);
+    }
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
     }
   },
 
