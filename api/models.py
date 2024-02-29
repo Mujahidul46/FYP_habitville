@@ -67,6 +67,7 @@ class Habit(models.Model):
     title = models.CharField(max_length=255)
     notes = models.TextField(blank=True, null=True)
     difficulty = models.CharField(max_length=2, choices=DIFFICULTY_CHOICES, default='ME')
+    categories = models.ManyToManyField('Category', related_name='habits', blank=True)
 
     def __str__(self):
         return self.title
@@ -106,3 +107,9 @@ class Reward(models.Model):
             'notes': self.notes,
             'cost': float(self.cost),
         }
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import ToDo, Habit, Reward
+from .models import ToDo, Habit, Reward, Category
 
 User = get_user_model()
 
@@ -37,17 +37,22 @@ class HabitForm(forms.ModelForm):
     title = forms.CharField(required=True, max_length=255)
     notes = forms.CharField(required=False, widget=forms.Textarea)
     difficulty = forms.ChoiceField(choices=Habit.DIFFICULTY_CHOICES, required=True)
-
+    categories = forms.ModelMultipleChoiceField(
+    queryset=Category.objects.all(), 
+    widget=forms.CheckboxSelectMultiple, 
+    required=False
+    )
 
     class Meta:
         model = Habit
-        fields = ('title', 'notes', 'difficulty')  
+        fields = ('title', 'notes', 'difficulty', 'categories')  
 
     def __init__(self, *args, **kwargs):
         super(HabitForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Habit Title'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes'})
         self.fields['difficulty'].widget.attrs.update({'class': 'form-control'})
+        self.fields['categories'].widget.attrs.update({'class': 'form-control'})
 
 class RewardForm(forms.ModelForm):
     name = forms.CharField(required=True, max_length=255)

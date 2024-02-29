@@ -28,6 +28,23 @@
           <!-- Habit Title Input -->
           <label for="titleInput">Title<span class="required-asterisk">*</span></label>
           <input id="titleInput" v-model="newHabit.title" placeholder="Add a title" required>
+          <!-- Habit Categories Select -->
+          <label for="categoriesSelect">Categories</label>
+          <select id="categoriesSelect" v-model="selectedCategories" multiple>
+            <option value="Academics">Academics</option>
+            <option value="Career">Career</option>
+            <option value="Creativity">Creativity</option>
+            <option value="Exercise">Exercise</option>
+            <option value="Finance">Finance</option>
+            <option value="Hygiene">Hygiene</option>
+            <option value="Mental Health">Mental Health</option>
+            <option value="Nutrition">Nutrition</option>
+            <option value="Organisation">Organisation</option>
+            <option value="Productivity">Productivity</option>
+            <option value="Social & Relationships">Social & Relationships</option>
+            <option value="Spirituality">Spirituality</option>
+            <option value="Other">Other</option>
+          </select>
           <!-- Habit Notes Input -->
           <label for="notesInput">Notes</label>
           <textarea id="notesInput" v-model="newHabit.notes" placeholder="Add notes"></textarea>
@@ -134,6 +151,7 @@ export default {
     const currentDate = ref(new Date());
     const maxPastDays = 60;
     const selectedDifficulty = ref('ME');
+    const selectedCategories = ref([]);
 
     const habits = computed(() => habitsStore.habits);
     const editingHabit = computed(() => habitsStore.editingHabit);
@@ -205,6 +223,7 @@ export default {
     }
 
     function createHabit() {
+      habitsStore.newHabit.categories = selectedCategories.value;
       habitsStore.createHabit(selectedDifficulty.value);
       closeAddHabitModal();
     }
@@ -217,6 +236,7 @@ export default {
     function openAddHabitModal() {
       isAddHabitModalVisible.value = true;
       selectedDifficulty.value = 'ME'; // Resets to medium difficulty
+      selectedCategories.value = [];
     }
 
     function openEditHabitModal(truncatedHabit) {
@@ -225,6 +245,7 @@ export default {
       selectedDifficulty.value = fullHabit.difficulty;
       isEditHabitModalVisible.value = true;
     }
+
 
 
     function submitHabitEdit() {
@@ -299,6 +320,7 @@ export default {
       wateringCanIcon,
       selectedDifficulty,
       truncatedHabits,
+      selectedCategories,
     };
   },
 };

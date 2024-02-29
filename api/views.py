@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm, ToDoForm, HabitForm, RewardForm
 from django.contrib.auth.decorators import login_required
-from .models import User, ToDo, Habit, HabitCompletion, Reward
+from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
 import json
 from django.middleware.csrf import get_token 
 from django.forms.models import model_to_dict
@@ -195,19 +195,26 @@ def create_habit_view(request: HttpRequest) -> HttpResponse:
         title = data.get('title')
         notes = data.get('notes', '')
         difficulty = data.get('difficulty', 'ME')
-        if title:  
+        category_names = data.get('categories', [])
+
+        if title:
             habit = Habit.objects.create(user=request.user, title=title, notes=notes, difficulty=difficulty)
+
+            if category_names:
+                categories = Category.objects.filter(name__in=category_names)
+                habit.categories.set(categories)
+
             return JsonResponse({
-                'id': habit.id, 
-                'title': habit.title, 
-                'notes': habit.notes, 
-                'difficulty': habit.difficulty
+                'id': habit.id,
+                'title': habit.title,
+                'notes': habit.notes,
+                'difficulty': habit.difficulty,
+                'categories': [category.name for category in habit.categories.all()]
             }, status=201)
-        else: 
+        else:
             return JsonResponse({'error': 'Title is required.'}, status=400)
     else:
         return HttpResponseNotAllowed(['POST'])
-
 
 @csrf_exempt
 @login_required

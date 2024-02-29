@@ -10,6 +10,7 @@ export const useHabitsStore = defineStore('habits', {
       title: '',
       notes: '',
       difficulty: 'ME',
+      categories: [],
     },
     editingHabit: null,
   }),
@@ -55,14 +56,17 @@ export const useHabitsStore = defineStore('habits', {
             'Content-Type': 'application/json',
             'X-CSRFToken': this.csrfToken,
           },
-          body: JSON.stringify(this.newHabit),
+          body: JSON.stringify({
+            ...this.newHabit,
+            categories: this.newHabit.categories,
+          }),
           credentials: 'include',
         });
         if (response.ok) {
           const createdHabit = await response.json();
-          createdHabit.completions = []; 
+          createdHabit.completions = [];
           this.habits.push(createdHabit);
-          this.resetNewHabit(); 
+          this.resetNewHabit();
         } else {
           console.error('Failed to create habit:', await response.text());
         }
@@ -70,13 +74,13 @@ export const useHabitsStore = defineStore('habits', {
         console.error('Error creating habit:', error);
       }
     },
-    
     resetNewHabit() {
       this.$patch({
         newHabit: {
           title: '',
           notes: '',
-          difficulty: 'ME' 
+          difficulty: 'ME',
+          categories: [],
         }
       });
     },

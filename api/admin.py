@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ToDo, Habit, HabitCompletion, Reward
+from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -25,9 +25,14 @@ class ToDoAdmin(admin.ModelAdmin):
         return qs.filter(user=request.user)
     
 class HabitAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'difficulty', 'notes') 
+    list_display = ('title', 'user', 'difficulty', 'get_categories', 'notes') 
     list_filter = ('user', 'difficulty') 
     search_fields = ('title', 'notes')
+
+    def get_categories(self, obj):
+        """Returns categories of a habit as a comma-separated list."""
+        return ", ".join([category.name for category in obj.categories.all()])
+    get_categories.short_description = 'Categories'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -57,8 +62,13 @@ class RewardAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(user=request.user)
     
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    
 admin.site.register(User, UserAdmin)
 admin.site.register(ToDo, ToDoAdmin)
 admin.site.register(Habit, HabitAdmin)
 admin.site.register(HabitCompletion, HabitCompletionAdmin)
 admin.site.register(Reward, RewardAdmin)
+admin.site.register(Category, CategoryAdmin)
