@@ -29,22 +29,15 @@
           <label for="titleInput">Title<span class="required-asterisk">*</span></label>
           <input id="titleInput" v-model="newHabit.title" placeholder="Add a title" required>
           <!-- Habit Categories Select -->
-          <label for="categoriesSelect">Categories</label>
-          <select id="categoriesSelect" v-model="selectedCategories" multiple>
-            <option value="Academics">Academics</option>
-            <option value="Career">Career</option>
-            <option value="Creativity">Creativity</option>
-            <option value="Exercise">Exercise</option>
-            <option value="Finance">Finance</option>
-            <option value="Hygiene">Hygiene</option>
-            <option value="Mental Health">Mental Health</option>
-            <option value="Nutrition">Nutrition</option>
-            <option value="Organisation">Organisation</option>
-            <option value="Productivity">Productivity</option>
-            <option value="Social & Relationships">Social & Relationships</option>
-            <option value="Spirituality">Spirituality</option>
-            <option value="Other">Other</option>
-          </select>
+          <fieldset class="categories-section">
+            <legend>Categories</legend>
+            <div class="categories-container">
+              <div v-for="category in ['Academics', 'Career', 'Creativity', 'Exercise', 'Finance', 'Hygiene', 'Mental Health', 'Nutrition', 'Organisation', 'Productivity', 'Social & Relationships', 'Spirituality', 'Other']" :key="category" class="category-item">
+                <input type="checkbox" :id="category" :value="category" v-model="selectedCategories" class="category-checkbox">
+                <label :for="category" class="category-label">{{ category }}</label>
+              </div>
+            </div>
+          </fieldset>
           <!-- Habit Notes Input -->
           <label for="notesInput">Notes</label>
           <textarea id="notesInput" v-model="newHabit.notes" placeholder="Add notes"></textarea>
@@ -512,6 +505,27 @@ select:focus {
   width: 9px; 
 }
 
+.categories-section {
+  border: 1px solid #ced4da;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 10px 0 20px;
+  background-color: #FFFFFF;
+}
 
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
+.category-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  margin-top: -15px;
+  line-height: 1.5;
+  width: calc(1000%);
+}
 </style>
