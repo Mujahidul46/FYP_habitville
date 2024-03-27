@@ -6,6 +6,7 @@ export const useHabitsStore = defineStore('habits', {
   state: () => ({
     csrfToken: '',
     habits: [],
+    categories: [],
     newHabit: {
       title: '',
       notes: '',
@@ -122,9 +123,9 @@ export const useHabitsStore = defineStore('habits', {
       }
     },
 
-    async updateHabit(habitId, updatedHabitData, selectedDifficulty) {
+    async updateHabit(habitId, updatedHabitData) {
       console.log(`Updating habit id ${habitId} with:`, updatedHabitData);
-      updatedHabitData.difficulty = selectedDifficulty;
+      updatedHabitData.categories = Array.from(updatedHabitData.categories);
       try {
         const response = await fetch(`http://localhost:8000/update-habit/${habitId}/`, {
           method: 'PUT',
@@ -179,6 +180,19 @@ export const useHabitsStore = defineStore('habits', {
       message += '!';
       notificationStore.addNotification(message);
     },
-    
+    async fetchCategories() {
+      try {
+        const response = await fetch("http://localhost:8000/list-categories/", {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          this.categories = await response.json();
+        } else {
+          console.error('Failed to fetch categories:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
   },
 });

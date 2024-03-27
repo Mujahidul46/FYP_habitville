@@ -195,13 +195,13 @@ def create_habit_view(request: HttpRequest) -> HttpResponse:
         title = data.get('title')
         notes = data.get('notes', '')
         difficulty = data.get('difficulty', 'ME')
-        category_names = data.get('categories', [])
+        category_ids = data.get('categories', [])
 
         if title:
             habit = Habit.objects.create(user=request.user, title=title, notes=notes, difficulty=difficulty)
 
-            if category_names:
-                categories = Category.objects.filter(name__in=category_names)
+            if category_ids:
+                categories = Category.objects.filter(id__in=category_ids)
                 habit.categories.set(categories)
 
             return JsonResponse({
@@ -209,32 +209,31 @@ def create_habit_view(request: HttpRequest) -> HttpResponse:
                 'title': habit.title,
                 'notes': habit.notes,
                 'difficulty': habit.difficulty,
-                'categories': [category.name for category in habit.categories.all()]
+                'categories': list(habit.categories.values_list('id', flat=True))
             }, status=201)
         else:
             return JsonResponse({'error': 'Title is required.'}, status=400)
-    else:
-        return HttpResponseNotAllowed(['POST'])
 
 @csrf_exempt
 @login_required
 def list_habits_view(request: HttpRequest) -> HttpResponse: 
     if request.method == 'GET':
-        habits = Habit.objects.filter(user=request.user)
+        habits = Habit.objects.filter(user=request.user).prefetch_related('categories')
         habit_data = []
         for habit in habits:
-            completions = habit.completions.all().values('date', 'completed') # get completion data for each habit
+            completions = habit.completions.all().values('date', 'completed')  # get completion data for each habit
+            category_ids = list(habit.categories.values_list('id', flat=True))
             habit_data.append({
                 'id': habit.id,
                 'title': habit.title,
                 'notes': habit.notes,
-                'difficulty': habit.difficulty,  
+                'difficulty': habit.difficulty,
+                'categories': category_ids,
                 'completions': list(completions),
             })
         return JsonResponse(habit_data, safe=False)
     else:
         return HttpResponseNotAllowed(['GET'])
-
 
 @csrf_exempt
 @login_required
@@ -280,11 +279,13 @@ def update_habit_view(request: HttpRequest, pk: int) -> HttpResponse:
         if form.is_valid():
             updated_habit = form.save()
             habit_data = model_to_dict(updated_habit, fields=['id', 'title', 'notes', 'difficulty'])
+            habit_data['categories'] = list(updated_habit.categories.values_list('id', flat=True))
             return JsonResponse(habit_data, status=200)
         else:
             return JsonResponse(form.errors, status=400)
     else:
         return HttpResponseNotAllowed(['PUT'])
+
 
 @csrf_exempt
 @login_required
@@ -366,3 +367,13 @@ def update_reward_view(request: HttpRequest, pk: int) -> JsonResponse:
             return JsonResponse(form.errors, status=400)
     else:
         return HttpResponseNotAllowed(['PUT'])
+
+@csrf_exempt   
+@login_required
+def list_categories_view(request: HttpRequest) -> HttpResponse:
+    if request.method == 'GET':
+        categories = Category.objects.all()
+        category_data = [{'id': category.id, 'name': category.name} for category in categories]
+        return JsonResponse(category_data, safe=False)
+    else:
+        return HttpResponseNotAllowed(['GET'])

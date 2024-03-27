@@ -32,9 +32,9 @@
           <fieldset class="categories-section">
             <legend>Categories</legend>
             <div class="categories-container">
-              <div v-for="category in ['Academics', 'Career', 'Creativity', 'Exercise', 'Finance', 'Hygiene', 'Mental Health', 'Nutrition', 'Organisation', 'Productivity', 'Social & Relationships', 'Spirituality', 'Other']" :key="category" class="category-item">
-                <input type="checkbox" :id="category" :value="category" v-model="selectedCategories" class="category-checkbox">
-                <label :for="category" class="category-label">{{ category }}</label>
+              <div v-for="category in categories" :key="category.id" class="category-item">
+                <input type="checkbox" :id="'add-' + category.name" :value="category.id" v-model="selectedCategories" class="category-checkbox">
+                <label :for="'add-' + category.name" class="category-label">{{ category.name }}</label>
               </div>
             </div>
           </fieldset>
@@ -92,6 +92,16 @@
           <!-- Edit Habit Title Input -->
           <label for="editTitleInput">Title<span class="required-asterisk">*</span></label>
           <input id="editTitleInput" v-model="editingHabit.title" placeholder="Edit title" required>
+          <!-- Categories Section for Editing -->
+          <fieldset class="categories-section">
+            <legend>Categories</legend>
+            <div class="categories-container">
+              <div v-for="category in categories" :key="category.id" class="category-item">
+                <input type="checkbox" :id="'edit-' + category.id" :value="category.id" v-model="editingSelectedCategories" class="category-checkbox">
+                <label :for="'edit-' + category.id" class="category-label">{{ category.name }}</label>
+              </div>
+            </div>
+          </fieldset>
           <!-- Edit Habit Notes Input -->
           <label for="editNotesInput">Notes</label>
           <textarea id="editNotesInput" v-model="editingHabit.notes" placeholder="Edit notes"></textarea>
@@ -148,6 +158,12 @@ export default {
 
     const habits = computed(() => habitsStore.habits);
     const editingHabit = computed(() => habitsStore.editingHabit);
+
+    const editingSelectedCategories = ref([]);
+
+    const categories = computed(() => habitsStore.categories);
+
+
 
     const displayedDates = computed(() => { // array of today and past 3 days
       let dates = [];
@@ -232,22 +248,26 @@ export default {
       selectedCategories.value = [];
     }
 
-    function openEditHabitModal(truncatedHabit) {
-      const fullHabit = habits.value.find(h => h.id === truncatedHabit.id); // find full habit object by using its id
+    function openEditHabitModal(habit) {
+      const fullHabit = habits.value.find(h => h.id === habit.id); // find full habit object by using its id
       habitsStore.editHabit(fullHabit);
-      selectedDifficulty.value = fullHabit.difficulty;
+      editingSelectedCategories.value = [...fullHabit.categories];
       isEditHabitModalVisible.value = true;
     }
 
-
-
     function submitHabitEdit() {
-      if (habitsStore.editingHabit) {
-        const { id, ...updatedHabitData } = habitsStore.editingHabit;
-        habitsStore.updateHabit(id, updatedHabitData, selectedDifficulty.value);
+      if (editingHabit.value) {
+        const updatedHabitData = {
+          title: editingHabit.value.title,
+          notes: editingHabit.value.notes,
+          difficulty: selectedDifficulty.value,
+          categories: editingSelectedCategories.value,
+        };
+        habitsStore.updateHabit(editingHabit.value.id, updatedHabitData);
         closeEditHabitModal();
       }
     }
+
 
     function closeEditHabitModal() {
       isEditHabitModalVisible.value = false;
@@ -283,6 +303,7 @@ export default {
 
     onMounted(() => {
       habitsStore.fetchHabits();
+      habitsStore.fetchCategories();
     });
 
     return {
@@ -314,6 +335,8 @@ export default {
       selectedDifficulty,
       truncatedHabits,
       selectedCategories,
+      categories,
+      editingSelectedCategories,
     };
   },
 };
