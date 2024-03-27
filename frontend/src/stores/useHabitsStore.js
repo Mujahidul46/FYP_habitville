@@ -141,6 +141,10 @@ export const useHabitsStore = defineStore('habits', {
           const habitIndex = this.habits.findIndex(h => h.id === habitId);
           if (habitIndex !== -1) {
             this.habits[habitIndex] = { ...this.habits[habitIndex], ...updatedHabit };
+
+            // Display notification
+            const notificationStore = useNotificationStore();
+            notificationStore.addNotification('Habit categories updated successfully.');
           }
         } else {
           console.error('Failed to update habit:', await response.text());
