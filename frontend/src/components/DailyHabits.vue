@@ -143,6 +143,8 @@ import { format, subDays, addDays, isToday } from 'date-fns';
 import deadTreeIcon from '@/assets/dead_tree_1.png';
 import completeHabitSound from '@/assets/sounds/complete_habit.mp3';
 import wateringCanIcon from '@/assets/watering_can_1.png';
+import { watchEffect } from 'vue';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 export default {
   name: 'DailyHabits',
@@ -162,8 +164,11 @@ export default {
     const editingSelectedCategories = ref([]);
 
     const categories = computed(() => habitsStore.categories);
+    const profileStore = useProfileStore();
 
-
+    watchEffect(() => {
+      document.documentElement.style.setProperty('--container-bg-color', profileStore.user.main_content_color);
+    });
 
     const displayedDates = computed(() => { // array of today and past 3 days
       let dates = [];
@@ -345,32 +350,34 @@ export default {
 <style scoped>
 .habit-tracker-container {
   min-height: 600px;
-  border: 2px solid #4CAF50;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   margin-right: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 1em;
-  background-color: #bcdbba;
+  background-color: var(--container-bg-color);
 }
 
 .nav-arrow {
   padding: 0.5em;
-  background-color: #8bc34a;
+  background-color: var(--container-bg-color);
   color: white;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  filter: brightness(85%);
 }
 
 .add-habit-btn {
   display: block;
   margin-left: auto;
   padding: 0.5em;
-  background-color: #8bc34a;
+  background-color: var(--container-bg-color);
   color: white;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-bottom: 1em;
+  filter: brightness(85%);
 }
 
 .date-navigation {
@@ -417,7 +424,7 @@ export default {
 
 .habit-cell {
   cursor: url('../assets/watering_can_1.png') 20 45, auto; 
-  border: 1px solid #bcdbba; /* need this otherwise cursor flickers */
+  border: 1px solid var(--container-bg-color); /* need this otherwise cursor flickers */
 }
 
 .habit-cell:hover {
@@ -464,8 +471,8 @@ export default {
 .empty-habit-list {
   text-align: center;
   margin-top: 5.5em; 
-  color: #a8a4a4; 
-  background-color: #bcdbba; 
+  color: var(--container-bg-color);
+  filter: brightness(0.5);
 }
 
 .empty-habit-content h3 {
@@ -477,11 +484,13 @@ export default {
 }
 
 .habit-cell i {
-  color: #4CAF50; 
+  color: #4CAF50;
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
 .habit-cell i.fa-seedling {
-  color: #96a75c; 
+  color: #96a75c;
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
 .icon-dead-tree {
@@ -489,6 +498,7 @@ export default {
   height: auto;
   position: relative;
   top: -4px;
+  filter: drop-shadow(1px 1px 0 rgb(0, 0, 0));
 }
 
 select {

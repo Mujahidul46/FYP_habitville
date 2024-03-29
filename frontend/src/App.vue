@@ -27,6 +27,13 @@
               active-class="nav-link-active"
             >Profile Page</router-link>
           </li>
+          <li class="nav-item">
+            <router-link
+              to="/statistics"
+              class="btn btn-outline-light m-2"
+              active-class="nav-link-active"
+            >Statistics</router-link>
+          </li>
           <!-- Logout button -->
           <li class="nav-item">
             <button
@@ -63,11 +70,8 @@
   </main>
 </template>
 
-
-
-
 <script>
-import { defineComponent, onMounted, computed } from 'vue';
+import { defineComponent, onMounted, computed, watch } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import { useProfileStore } from '@/stores/useProfileStore';
 import Notification from '@/components/Notification.vue';
@@ -83,10 +87,22 @@ export default defineComponent({
 
     onMounted(async () => {
       await profileStore.fetchUserProfile();
+      updateColorStyles(profileStore.user);
     });
 
     const userProfile = computed(() => profileStore.user);
-    const notifications = computed(() => notificationStore.notifications); 
+    const notifications = computed(() => notificationStore.notifications);
+
+    watch(userProfile, (newValue) => {
+      updateColorStyles(newValue);
+    }, { deep: true });
+
+    const updateColorStyles = (user) => {
+      if (user.navbar_color && user.main_content_color) {
+        document.documentElement.style.setProperty('--navbar-bg-color', user.navbar_color);
+        document.documentElement.style.setProperty('--main-content-bg-color', user.main_content_color);
+      }
+    };
 
     const logout = () => {
       window.location.href = "http://localhost:8000/logout/";
@@ -106,6 +122,12 @@ export default defineComponent({
 
 
 <style>
+:root {
+  --navbar-bg-color: #94b752;
+  --main-content-bg-color: #b18b8b;
+  --container-bg-color: #61da59;
+}
+
 body, html {
     margin: 0;
     padding: 0;
@@ -122,7 +144,7 @@ body, html {
 }
 
 .navbar-custom {
-    background-color: #646464;
+    background-color: var(--navbar-bg-color);
     display: flex;
     justify-content: space-between; 
     align-items: center;
@@ -174,10 +196,9 @@ body, html {
     margin-left: auto; 
 }
 
-
 main {
     flex: 1;
-    background-color: #e4e4e4;
+    background-color: var(--main-content-bg-color);
 }
 
 .footer-custom {
@@ -260,7 +281,6 @@ main {
   position: relative;
   top: 1.75px; 
 }
-
 
 .gem-icon {
   width: 1.8rem; 

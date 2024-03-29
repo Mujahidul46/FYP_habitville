@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import VillageMap from '../components/VillageMap.vue';
 import FishingMinigame from '../components/FishingMinigame.vue';
+import Statistics from '../components/Statistics.vue';
 
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
@@ -13,6 +14,7 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/profile/', name: 'Profile Page', component: ProfilePage, meta: { requiresAuth: true } },
     { path: '/village', name: 'VillageMap', component: VillageMap, meta: { requiresAuth: true } },
     { path: '/fishing-minigame', name: 'FishingMinigame', component: FishingMinigame, meta: { requiresAuth: true, fullscreen: true } },
+    { path: '/statistics', name: 'Statistics', component: Statistics, meta: { requiresAuth: true } },
 
 ];
 

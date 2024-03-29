@@ -68,4 +68,24 @@ class RewardForm(forms.ModelForm):
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Reward Name'})
         self.fields['notes'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Notes (Optional)'})
         self.fields['cost'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Cost in Life Points'})
-        
+
+class UserProfileForm(forms.ModelForm):
+    navbar_color = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'type': 'color', 'class': 'form-control'}),
+        initial='#8e8e8e'
+    )
+    main_content_color = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'type': 'color', 'class': 'form-control'}),
+        initial='#e4e4e4'
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'goals', 'navbar_color', 'main_content_color')
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({'class': 'form-control'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})

@@ -4,13 +4,16 @@ from django.utils.timezone import now
 
 class User(AbstractUser):
     """
-    Creates a user model table with custom fields for Habitville app.
+    Creates a user model table with custom fields.
     """
     username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
     goals = models.TextField(blank=True, null=True)
     habit_points = models.IntegerField(default=0)  
-    life_points = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
+    life_points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # Nav bar and main content background colours
+    navbar_color = models.CharField(max_length=7, default='#3f51b5')
+    main_content_color = models.CharField(max_length=7, default='#6A5ACD')
 
     def __str__(self):
         return self.username
@@ -24,7 +27,9 @@ class User(AbstractUser):
             'email': self.email,
             'goals': self.goals,
             'habit_points': self.habit_points,  
-            'life_points': float(self.life_points)  
+            'life_points': float(self.life_points),
+            'navbar_color': self.navbar_color,
+            'main_content_color': self.main_content_color,
         }
     
 class ToDo(models.Model):

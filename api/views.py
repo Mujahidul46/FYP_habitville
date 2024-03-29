@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm, ToDoForm, HabitForm, RewardForm
+from .forms import CustomUserCreationForm, ToDoForm, HabitForm, RewardForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
 from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
 import json
@@ -60,21 +60,24 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
     return redirect('login_view')
 
+@csrf_exempt
 @login_required
 def user_api(request: HttpRequest) -> JsonResponse:
     """
     Returns the authenticated user's information as JSON.
     """
     if request.method == 'GET':
+        user = request.user
         return JsonResponse({
-            'username': request.user.username,
-            'email': request.user.email,
-            'goals': request.user.goals,
-            'habit_points': request.user.habit_points,  
-            'life_points': float(request.user.life_points),  
+            'username': user.username,
+            'email': user.email,
+            'goals': user.goals,
+            'habit_points': user.habit_points,
+            'life_points': float(user.life_points),
+            'navbar_color': user.navbar_color,
+            'main_content_color': user.main_content_color,
         })
     return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
-
 
 @login_required
 @csrf_exempt
@@ -83,23 +86,21 @@ def update_user_profile(request: HttpRequest) -> JsonResponse:
     Updates the authenticated user's profile.
     """
     if request.method == 'PUT':
-        try:
-            data = json.loads(request.body)
-            user = request.user
-            user.username = data.get('username', user.username)
-            user.email = data.get('email', user.email)
-            user.goals = data.get('goals', user.goals)
-            user.save()
+        form = UserProfileForm(data=json.loads(request.body), instance=request.user)
+        if form.is_valid():
+            user = form.save()
             return JsonResponse({
                 'username': user.username,
                 'email': user.email,
-                'goals': user.goals
+                'goals': user.goals,
+                'navbar_color': user.navbar_color,
+                'main_content_color': user.main_content_color,
             })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+        else:
+            return JsonResponse(form.errors, status=400)
     else:
-        return JsonResponse({'error': 'Only PUT method is allowed'}, status=400)
-    
+        return JsonResponse({'error': 'Only PUT method is allowed'}, status=405)
+
 def check_authentication(request):
     return JsonResponse({'isAuthenticated': request.user.is_authenticated})
 

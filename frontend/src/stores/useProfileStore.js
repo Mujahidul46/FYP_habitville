@@ -7,7 +7,9 @@ export const useProfileStore = defineStore('profile', {
       email: '',
       goals: '',
       habit_points: 0,  
-      life_points: 0.00, 
+      life_points: 0.00,
+      navbar_color: '#8bc34a',
+      main_content_color: '#009688',
     },
     statusMessage: ''
   }),
@@ -28,6 +30,8 @@ export const useProfileStore = defineStore('profile', {
             ...userData,
             habit_points: parseInt(userData.habit_points, 10) || 0,
             life_points: parseFloat(userData.life_points) || 0.00,
+            navbar_color: userData.navbar_color,
+            main_content_color: userData.main_content_color,
           };
           console.log("Fetched user data:", this.user); 
         } else {
@@ -55,19 +59,27 @@ export const useProfileStore = defineStore('profile', {
         });
     
         if (response.ok) {
-          const data = await response.json();
-          this.user = data; 
-          this.statusMessage = "Profile updated successfully"; 
-          return true; 
+          const updatedUserData = await response.json();
+          this.user = {
+            ...this.user,
+            ...updatedUserData,
+            habit_points: parseInt(updatedUserData.habit_points, 10) || 0,
+            life_points: parseFloat(updatedUserData.life_points) || 0.00,
+            navbar_color: updatedUserData.navbar_color,
+            main_content_color: updatedUserData.main_content_color,
+          };
+          this.statusMessage = "Profile updated successfully";
+          return true;
         } else {
           this.statusMessage = "Failed to update profile. Please try again.";
-          return false; 
+          return false;
         }
       } catch (error) {
+        console.error("Error during profile update:", error);
         this.statusMessage = "An error occurred while updating the profile.";
-        return false; 
+        return false;
       }
-    },
+    },   
     updatePoints(hp, lp) {
       this.user.habit_points += parseInt(hp, 10);
       const parsedLP = parseFloat(lp);

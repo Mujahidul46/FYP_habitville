@@ -4,12 +4,12 @@ from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
 
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'goals', 'habit_points', 'life_points')
+    list_display = ('username', 'email', 'is_staff', 'is_active', 'goals', 'habit_points', 'life_points', 'navbar_color', 'main_content_color')
     fieldsets = BaseUserAdmin.fieldsets + (
-        (None, {'fields': ('goals', 'habit_points', 'life_points')}),
+        (None, {'fields': ('goals', 'habit_points', 'life_points', 'navbar_color', 'main_content_color' )}),
     )
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (None, {'fields': ('email', 'username', 'password1', 'password2', 'goals')}),
+        (None, {'fields': ('email', 'username', 'password1', 'password2', 'goals', 'navbar_color', 'main_content_color')}),
     )
 
 class ToDoAdmin(admin.ModelAdmin):
