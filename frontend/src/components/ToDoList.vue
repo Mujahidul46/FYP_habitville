@@ -121,6 +121,7 @@ export default {
 </script>
 
 <style scoped>
+
 .to-do form {
   margin-bottom: 1em;
 }
@@ -167,11 +168,11 @@ export default {
 
 .todo-list-container {
   min-height: 600px; 
-  border: 2px solid #4CAF50;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   margin: auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   padding: 1em;
-  background-color: #bcdbba;
+  background-color: var(--container-bg-color);
   position: relative;
 }
 
@@ -181,14 +182,15 @@ export default {
   right: 20px;
   cursor: pointer;
   padding: 0.5em;
-  background-color: #8bc34a; 
+  background-color: var(--container-bg-color); 
   color: white;
   border: none;
   transition: background-color 0.3s ease; 
+  filter: brightness(85%);
 }
 
 .to-do .todo-list-container .add-todo-btn:hover {
-  background-color: #add681; 
+  background-color: #a481d6; 
 }
 
 .todo-item {
@@ -254,7 +256,8 @@ export default {
   text-align: center;
   margin-top: 10em; 
   color: #a8a4a4;
-  background-color: #bcdbba;
+  color: var(--container-bg-color);
+  filter: brightness(0.5);
 }
 
 .empty-todo-content h3 {
@@ -267,25 +270,25 @@ export default {
 
 .to-do .todo-list-container .view-toggle {
   margin-right: 10px;
-  background-color: #8bc34a; 
+  background-color: var(--container-bg-color); 
   padding: 10px 20px;
   border: none;
   outline: none;
   cursor: pointer;
   transition: background-color 0.3s, border-bottom 0.3s, color 0.3s;
+  filter: brightness(85%);
 }
 
 .to-do .todo-list-container .view-toggle.active {
-  background-color: #bfe593; 
-  color: #33691e; 
+  background-color: var(--container-bg-color); 
   font-weight: bold; 
-  border-bottom: 4px solid #7cb342; 
+  border-bottom: 4px solid transparent;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 4px 4px 0 0;
   margin-bottom: -4px;
-}
-
-.to-do .todo-list-container .view-toggle:hover {
-  background-color: #add681; 
+  transform: scale(0.98);
+  filter: brightness(85%);
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
 }
 
 .accomplished .todo-item {

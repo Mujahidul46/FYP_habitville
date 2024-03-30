@@ -3,21 +3,23 @@
     <!-- Add Habit Button -->
     <button class="add-habit-btn" @click="openAddHabitModal">Add Habit</button>
 
-    <!-- Date Navigation -->
-    <div class="date-navigation">
-      <!-- Left Arrow -->
-      <button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>
-      <!-- Date Header -->
-      <div class="date-header">
-        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
-        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
-        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
-        <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
-        <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
-        <div class="date-cell-placeholder placeholder-adjustment"></div> <!-- Placeholder div for alignment -->
+    <div v-if="habits.length">
+      <!-- Date Navigation -->
+      <div class="date-navigation">
+        <!-- Left Arrow -->
+        <button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>
+        <!-- Date Header -->
+        <div class="date-header">
+          <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+          <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+          <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+          <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
+          <div class="date-cell" v-for="date in displayedDates" :key="date" v-html="formatDate(date)"></div>
+          <div class="date-cell-placeholder placeholder-adjustment"></div> <!-- Placeholder div for alignment -->
+        </div>
+        <!-- Right Arrow -->
+        <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
       </div>
-      <!-- Right Arrow -->
-      <button class="nav-arrow right-arrow" @click="changeDate(-4)" :class="{'invisible': isOldestDate}">→</button>
     </div>
 
     <!-- Modal for Adding Habit -->
@@ -79,7 +81,7 @@
     <!-- Message if No Habits -->
     <div v-else class="empty-habit-list">
       <div class="empty-habit-content">
-        <h3 class="empty-title">You have no daily habits yet.</h3>
+        <h3 class="empty-title">You have no daily habits</h3>
         <p>Add a new habit to get started!</p>
       </div>
     </div>
@@ -470,7 +472,7 @@ export default {
 
 .empty-habit-list {
   text-align: center;
-  margin-top: 5.5em; 
+  margin-top: 10em;
   color: var(--container-bg-color);
   filter: brightness(0.5);
 }
@@ -480,7 +482,7 @@ export default {
 }
 
 .empty-habit-content p {
-  font-style: italic; 
+  font-style: italic;
 }
 
 .habit-cell i {
@@ -535,7 +537,7 @@ select:focus {
 }
 
 .placeholder-adjustment {
-  width: 9px; 
+  width: 9px;
 }
 
 .categories-section {

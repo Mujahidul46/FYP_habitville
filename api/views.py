@@ -14,14 +14,12 @@ from datetime import datetime
 from .points_service import calculate_points
 from decimal import Decimal
 
-
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
             'welcome_content': True  
         })
     return render(request, 'base.html')
-
 
 @csrf_exempt
 def signup_view(request: HttpRequest) -> HttpResponse:

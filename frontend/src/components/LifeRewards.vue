@@ -16,6 +16,14 @@
       </ul>
     </div>
 
+    <!-- Empty rewards list text -->
+    <div v-if="!rewards.length" class="empty-rewards-list">
+      <div class="empty-rewards-content">
+        <h3 class="emptyTitle">You have no Rewards</h3>
+        <p>Spend your Habit Points on real-life treats. E.g. "Watch a TV show episode" or "Enjoy a coffee break".</p>
+      </div>
+    </div>
+
     <!-- Modal for adding or editing reward details -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal-content">
@@ -186,10 +194,10 @@ export default {
 <style scoped>
 .life-rewards-container {
   min-height: 600px;
-  border: 2px solid #4CAF50;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   padding: 1em;
-  background-color: #bcdbba;
+  background-color: var(--container-bg-color);
   position: relative;
 }
 
@@ -281,11 +289,12 @@ export default {
   top: 10px;
   right: 10px;
   padding: 0.5em;
-  background-color: #8bc34a;
+  background-color: var(--container-bg-color); 
   color: white;
   border: none;
   cursor: pointer;
   z-index: 2;
+  filter: brightness(85%);
 }
 
 .modal-footer button {
@@ -303,4 +312,21 @@ export default {
   border: none;
   cursor: pointer;
 }
+
+.empty-rewards-list {
+  text-align: center;
+  margin-top: 10em; 
+  color: var(--container-bg-color);
+  filter: brightness(0.5);
+}
+
+.empty-rewards-content h3 {
+  margin-bottom: 0.5em; 
+}
+
+.empty-rewards-content p {
+  font-style: italic; 
+}
+
+
 </style>

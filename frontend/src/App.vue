@@ -7,7 +7,7 @@
           <li class="nav-item">
             <router-link
               to="/"
-              class="btn btn-outline-light m-2"
+              class="btn btn-outline-custom m-2"
               active-class="nav-link-active"
             >Habit Tracker</router-link>
           </li>
@@ -15,7 +15,7 @@
           <li class="nav-item">
             <router-link
               to="/village"
-              class="btn btn-outline-light m-2"
+              class="btn btn-outline-custom m-2"
               active-class="nav-link-active"
             >Village</router-link>
           </li>
@@ -23,14 +23,14 @@
           <li class="nav-item">
             <router-link
               to="/profile"
-              class="btn btn-outline-light m-2"
+              class="btn btn-outline-custom m-2"
               active-class="nav-link-active"
             >Profile Page</router-link>
           </li>
           <li class="nav-item">
             <router-link
               to="/statistics"
-              class="btn btn-outline-light m-2"
+              class="btn btn-outline-custom m-2"
               active-class="nav-link-active"
             >Statistics</router-link>
           </li>
@@ -38,7 +38,7 @@
           <li class="nav-item">
             <button
               type="button"
-              class="btn btn-outline-light m-2"
+              class="btn btn-outline-custom m-2"
               @click="logout"
             >Logout</button>
           </li>
@@ -122,12 +122,6 @@ export default defineComponent({
 
 
 <style>
-:root {
-  --navbar-bg-color: #94b752;
-  --main-content-bg-color: #b18b8b;
-  --container-bg-color: #61da59;
-}
-
 body, html {
     margin: 0;
     padding: 0;
@@ -151,13 +145,24 @@ body, html {
     padding: 0 1.5rem !important;
 }
 
-.navbar-custom .navbar-brand,
-.navbar-custom .navbar-brand:hover,
-.navbar-custom .navbar-nav .nav-link,
-.navbar-custom .navbar-nav .nav-link:hover {
-    color: white;
+.navbar-custom .navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-custom .navbar-nav .nav-item .btn,
+.navbar-custom .navbar-nav .nav-item .btn:hover,
+.navbar-custom .navbar-nav .nav-item .btn:focus {
+    color: rgb(0, 0, 0);
+    font-weight: 500;
     cursor: pointer;
 }
+
+.btn-outline-custom {
+    color: rgb(0, 0, 0);
+    background-color: transparent;
+    border: 1px solid rgb(0, 0, 0);
+}
+
 
 .navbar-custom .navbar-collapse {
     display: flex;
@@ -264,14 +269,15 @@ main {
 }
 
 .navbar-custom .navbar-nav .nav-item .nav-link-active {
-  box-shadow: 0 0 20px 0 rgba(1, 163, 104, 0.7); 
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease; 
-  transform: translateY(-2px); 
-  background-image: linear-gradient(45deg, #025301, rgb(3, 160, 97)); 
-  color: #ffffff; 
+  transform: translateY(-2px);
+  background-color: var(--navbar-bg-color);
+  background-image: none;
+  color: #000000;
   border-radius: 4px; 
   padding: .375rem .75rem; 
-  border: 1px solid #027d40; 
+  border: 1px solid darken(var(--navbar-bg-color), 10%);
 }
 
 .points-number {
