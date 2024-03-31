@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
+import math
 
 class User(AbstractUser):
     """
@@ -118,3 +119,27 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+class CategoryProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='category_progress')
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    level = models.IntegerField(default=1)
+    current_exp = models.IntegerField(default=0)
+
+    def exp_to_next_level(self):
+        return math.ceil(100 * (1.5 ** (self.level - 1))) # exponential formula, so less exp required to level up for starting levels
+
+    def __str__(self):
+        return f"{self.user.username} - {self.category.name} - Level: {self.level} - EXP: {self.current_exp}/{self.exp_to_next_level()}"
+
+    class Meta:
+        unique_together = ('user', 'category')
+
+    def to_dict(self):
+        return {
+            'user': self.user.username,
+            'category': self.category.name,
+            'level': self.level,
+            'current_exp': self.current_exp,
+            'exp_to_next_level': self.exp_to_next_level(),
+        }

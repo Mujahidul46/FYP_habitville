@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm, ToDoForm, HabitForm, RewardForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
-from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
+from .models import User, ToDo, Habit, HabitCompletion, Reward, Category, CategoryProgress
 import json
 from django.middleware.csrf import get_token 
 from django.forms.models import model_to_dict
@@ -13,6 +13,9 @@ from django.utils.timezone import now
 from datetime import datetime
 from .points_service import calculate_points
 from decimal import Decimal
+import math
+
+EXP_REWARD_PER_HABIT = 10
 
 def main_spa(request: HttpRequest) -> HttpResponse: 
     if not request.user.is_authenticated:
@@ -253,6 +256,15 @@ def update_habit_completion_view(request: HttpRequest, habit_id: int) -> JsonRes
                 request.user.habit_points += hp_earned
                 request.user.life_points += Decimal(lp_earned).quantize(Decimal('0.00'))
                 request.user.save()
+
+                # Update CategoryProgress for each category related to a habit
+                for category in habit.categories.all():
+                    category_progress, created = CategoryProgress.objects.get_or_create(user=request.user, category=category)
+                    category_progress.current_exp += EXP_REWARD_PER_HABIT 
+                    while category_progress.current_exp >= category_progress.exp_to_next_level():
+                        category_progress.current_exp -= category_progress.exp_to_next_level()
+                        category_progress.level += 1
+                    category_progress.save()
                 
             habit_completion.save()
             response_data = {
@@ -376,3 +388,36 @@ def list_categories_view(request: HttpRequest) -> HttpResponse:
         return JsonResponse(category_data, safe=False)
     else:
         return HttpResponseNotAllowed(['GET'])
+
+@csrf_exempt  
+@login_required
+def category_progress_view(request: HttpRequest) -> JsonResponse:
+    if request.method == 'GET':
+        all_categories = Category.objects.all()
+        user_progress_qs = CategoryProgress.objects.filter(user=request.user)
+
+        user_progress_dict = {progress.category.name: progress for progress in user_progress_qs}
+
+        progress_data = []
+        for category in all_categories:
+            # If user has progress in category, use it
+            if category.name in user_progress_dict:
+                progress = user_progress_dict[category.name]
+                progress_data.append({
+                    'category_name': category.name,
+                    'level': progress.level,
+                    'current_exp': progress.current_exp,
+                    'exp_to_next_level': progress.exp_to_next_level(),
+                })
+            # if user has no exp in a category
+            else:
+                progress_data.append({
+                    'category_name': category.name,
+                    'level': 1,
+                    'current_exp': 0,
+                    'exp_to_next_level': 100,
+                })
+        
+        return JsonResponse(progress_data, safe=False)
+    else:
+        return JsonResponse({'error': 'Only GET method is allowed'}, status=405)

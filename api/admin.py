@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ToDo, Habit, HabitCompletion, Reward, Category
+from .models import User, ToDo, Habit, HabitCompletion, Reward, Category, CategoryProgress
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -65,6 +65,22 @@ class RewardAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
+class CategoryProgressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'category', 'level', 'current_exp', 'exp_to_next_level_display')
+    list_filter = ('user', 'category')
+    search_fields = ('user__username', 'category__name')
+
+    def exp_to_next_level_display(self, obj):
+        return obj.exp_to_next_level()
+    exp_to_next_level_display.short_description = 'EXP to Next Level'
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
+
     
 admin.site.register(User, UserAdmin)
 admin.site.register(ToDo, ToDoAdmin)
@@ -72,3 +88,4 @@ admin.site.register(Habit, HabitAdmin)
 admin.site.register(HabitCompletion, HabitCompletionAdmin)
 admin.site.register(Reward, RewardAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(CategoryProgress, CategoryProgressAdmin)
