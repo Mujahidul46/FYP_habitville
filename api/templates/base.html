@@ -10,7 +10,7 @@
         body, html {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #65dc6f; 
+            background-color: #8bc34a; 
             color: #333; 
             height: 100%; 
         }
@@ -21,19 +21,22 @@
             min-height: 100vh; 
         }
 
-        .navbar-custom {
-            background-color: #4CAF50; 
-            padding: 0 1.5rem;
+        .navbar-custom,
+        .footer-custom {
+            background-color: #4caf50;
+            color: rgb(0, 0, 0);
         }
-    
+
         .navbar-custom .navbar-brand,
         .navbar-custom .navbar-nav .nav-link {
-            color: white;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
         }
+        
     
         .footer-custom {
-            background-color: #4CAF50; 
-            color: white;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
         }
 
     .form-container {
@@ -72,13 +75,12 @@
         left: -20px; 
         color: #333; 
     }
-
     </style>
     
     {% block extra_css %}
     <style>
         .home-title {
-            font-size: 4rem; 
+            font-size: 3.6rem; 
             margin-bottom: 1rem;
         }
         
@@ -99,7 +101,40 @@
             text-align: center;
         }
 
-        
+        /* signup, login forms */
+
+        label {
+            font-weight: bold;
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 5px;
+        }
+
+        .form-container h2 {
+            font-weight: bold;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-container input,
+        .form-container textarea,
+        .form-container button,
+        .form-container .form-group {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 2px;
+        } 
     </style>
     {% endblock %}
 </head>

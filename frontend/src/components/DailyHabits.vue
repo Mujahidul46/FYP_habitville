@@ -380,6 +380,7 @@ export default {
   transition: background-color 0.3s ease;
   margin-bottom: 1em;
   filter: brightness(85%);
+  border-radius: 0.45em;
 }
 
 .date-navigation {

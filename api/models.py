@@ -12,8 +12,8 @@ class User(AbstractUser):
     habit_points = models.IntegerField(default=0)  
     life_points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     # Nav bar and main content background colours
-    navbar_color = models.CharField(max_length=7, default='#3f51b5')
-    main_content_color = models.CharField(max_length=7, default='#6A5ACD')
+    navbar_color = models.CharField(max_length=7, default='#4caf50') # green
+    main_content_color = models.CharField(max_length=7, default='#8bc34a') # light green
 
     def __str__(self):
         return self.username

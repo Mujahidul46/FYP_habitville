@@ -187,6 +187,7 @@ export default {
   border: none;
   transition: background-color 0.3s ease; 
   filter: brightness(85%);
+  border-radius: 0.45em;
 }
 
 .to-do .todo-list-container .add-todo-btn:hover {
@@ -249,7 +250,8 @@ export default {
 }
 
 .view-toggle {
-  margin-right: 10px; 
+  margin-right: 10px;
+  border-radius: 0.45em;
 }
 
 .empty-todo-list {
@@ -284,7 +286,6 @@ export default {
   font-weight: bold; 
   border-bottom: 4px solid transparent;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  border-radius: 4px 4px 0 0;
   margin-bottom: -4px;
   transform: scale(0.98);
   filter: brightness(85%);

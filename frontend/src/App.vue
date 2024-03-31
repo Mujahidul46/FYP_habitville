@@ -25,7 +25,7 @@
               to="/profile"
               class="btn btn-outline-custom m-2"
               active-class="nav-link-active"
-            >Profile Page</router-link>
+            >Profile</router-link>
           </li>
           <li class="nav-item">
             <router-link

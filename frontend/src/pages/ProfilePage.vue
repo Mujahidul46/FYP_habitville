@@ -77,7 +77,7 @@ export default defineComponent({
     { name: 'Amber', hex: '#ffc107' },
     { name: 'Lime', hex: '#cddc39' },
     { name: 'Light Green', hex: '#8bc34a' },
-    { name: 'Green', hex: '#4caf50' },
+    { name: 'Green', hex: '#4caf50' }, // default navbar colour
     { name: 'Teal', hex: '#009688' },
     { name: 'Cyan', hex: '#00bcd4' },
     { name: 'Light Blue', hex: '#03a9f4' },
@@ -109,14 +109,14 @@ export default defineComponent({
     { name: 'Yellow', hex: '#ffeb3b' },
     { name: 'Amber', hex: '#ffc107' },
     { name: 'Lime', hex: '#cddc39' },
-    { name: 'Light Green', hex: '#8bc34a' },
+    { name: 'Light Green', hex: '#8bc34a' }, // default main colour
     { name: 'Green', hex: '#4caf50' },
     { name: 'Teal', hex: '#009688' }, 
     { name: 'Cyan', hex: '#00bcd4' },
     { name: 'Light Blue', hex: '#03a9f4' },
     { name: 'Blue', hex: '#2196f3' },
-    { name: 'SlateBlue', hex: '#6A5ACD' }, // main default
-    { name: 'Indigo', hex: '#3f51b5' }, // navbar default
+    { name: 'SlateBlue', hex: '#6A5ACD' },
+    { name: 'Indigo', hex: '#3f51b5' },
     { name: 'Purple', hex: '#9c27b0' },
     { name: 'Orchid', hex: '#DA70D6' },
     { name: 'Deep Purple', hex: '#673ab7' },
@@ -244,4 +244,12 @@ export default defineComponent({
 .color-swatch.selected {
   border-color: #000;
 }
+
+.profile-page label {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 4px;
+  display: block;
+}
+
 </style>

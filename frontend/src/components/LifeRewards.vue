@@ -295,6 +295,7 @@ export default {
   cursor: pointer;
   z-index: 2;
   filter: brightness(85%);
+  border-radius: 0.45em;
 }
 
 .modal-footer button {
