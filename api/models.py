@@ -127,7 +127,7 @@ class CategoryProgress(models.Model):
     current_exp = models.IntegerField(default=0)
 
     def exp_to_next_level(self):
-        return math.ceil(100 * (1.5 ** (self.level - 1))) # exponential formula, so less exp required to level up for starting levels
+        return math.ceil(50 * (1.2 ** (self.level - 1))) # exponential formula, so less exp required to level up for starting levels
 
     def __str__(self):
         return f"{self.user.username} - {self.category.name} - Level: {self.level} - EXP: {self.current_exp}/{self.exp_to_next_level()}"

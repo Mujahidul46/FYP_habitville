@@ -107,11 +107,10 @@ export const useHabitsStore = defineStore('habits', {
             } else {
               habit.completions.push({ date, completed });
             }
-            
+            console.log("Completed:", completed);
             if (completed && responseData.hp_earned > 0) {
               const profileStore = useProfileStore();
               profileStore.updatePoints(responseData.hp_earned, responseData.lp_earned);
-
               this.showPointsEarnedNotification(responseData.hp_earned, responseData.lp_earned);
             }
           }

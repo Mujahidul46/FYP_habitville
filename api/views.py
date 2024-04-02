@@ -245,21 +245,23 @@ def update_habit_completion_view(request: HttpRequest, habit_id: int) -> JsonRes
         data = json.loads(request.body)
         date = data.get('date')
         completed = data.get('completed')
+        hp_earned, lp_earned = 0, 0
         
         if date is not None and isinstance(completed, bool):
             date = datetime.strptime(date, '%Y-%m-%d').date()  
             habit_completion, created = HabitCompletion.objects.get_or_create(habit=habit, date=date)
             habit_completion.completed = completed
             
-            if completed and created:
-                hp_earned, lp_earned = calculate_points(habit.difficulty)
-                request.user.habit_points += hp_earned
-                request.user.life_points += Decimal(lp_earned).quantize(Decimal('0.00'))
-                request.user.save()
+            if completed:
+                hp_earned, lp_earned = calculate_points(habit.difficulty) if created or not habit_completion.completed else (0, 0)
+                if hp_earned > 0 or lp_earned > 0:
+                    request.user.habit_points += hp_earned
+                    request.user.life_points += Decimal(lp_earned).quantize(Decimal('0.00'))
+                    request.user.save()
 
                 # Update CategoryProgress for each category related to a habit
                 for category in habit.categories.all():
-                    category_progress, created = CategoryProgress.objects.get_or_create(user=request.user, category=category)
+                    category_progress, _ = CategoryProgress.objects.get_or_create(user=request.user, category=category)
                     category_progress.current_exp += EXP_REWARD_PER_HABIT 
                     while category_progress.current_exp >= category_progress.exp_to_next_level():
                         category_progress.current_exp -= category_progress.exp_to_next_level()
@@ -271,14 +273,15 @@ def update_habit_completion_view(request: HttpRequest, habit_id: int) -> JsonRes
                 'habit_id': habit_id,
                 'date': date.isoformat(),
                 'completed': completed,
-                'hp_earned': hp_earned if completed and created else 0,
-                'lp_earned': float(lp_earned) if completed and created else 0.00,
+                'hp_earned': hp_earned,
+                'lp_earned': float(lp_earned),
             }
             return JsonResponse(response_data, status=200)
         else:
             return JsonResponse({'error': 'Date and completed status are required.'}, status=400)
     else:
         return HttpResponseNotAllowed(['PUT'])
+
     
 @csrf_exempt
 @login_required
@@ -415,7 +418,7 @@ def category_progress_view(request: HttpRequest) -> JsonResponse:
                     'category_name': category.name,
                     'level': 1,
                     'current_exp': 0,
-                    'exp_to_next_level': 100,
+                    'exp_to_next_level': 50,
                 })
         
         return JsonResponse(progress_data, safe=False)

@@ -7,7 +7,8 @@
       <!-- Date Navigation -->
       <div class="date-navigation">
         <!-- Left Arrow -->
-        <button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>
+        <!--<button class="nav-arrow left-arrow" @click="changeDate(4)" :class="{'invisible': isMostRecentDate}">←</button>-->
+        <button class="nav-arrow left-arrow" @click="changeDate(4)">←</button>
         <!-- Date Header -->
         <div class="date-header">
           <div class="date-cell-placeholder"></div> <!-- Placeholder div for alignment -->
@@ -407,6 +408,9 @@ export default {
 .habit-row {
   display: contents;
 }
+
+
+
 
 .date-cell, .habit-cell {
   text-align: center;

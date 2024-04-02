@@ -7,6 +7,7 @@ export const useNotificationStore = defineStore('notification', {
   }),
   actions: {
     addNotification(message) {
+      console.log("NOW")
       const newNotification = {
         id: Date.now(),
         message: message,
