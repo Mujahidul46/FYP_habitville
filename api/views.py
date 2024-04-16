@@ -424,3 +424,23 @@ def category_progress_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse(progress_data, safe=False)
     else:
         return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
+    
+@csrf_exempt
+@login_required
+def spend_habit_points_for_minigame(request: HttpRequest) -> JsonResponse:
+    if request.method == 'POST':
+        if request.user.habit_points >= 100:
+            request.user.habit_points -= 100
+            request.user.save(update_fields=['habit_points'])
+            return JsonResponse({
+                'status': 'success',
+                'message': '100 habit points deducted successfully!',
+                'new_habit_points': request.user.habit_points
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Not enough habit points to play the minigame.'
+            }, status=400)
+    else:
+        return HttpResponseNotAllowed(['POST'])

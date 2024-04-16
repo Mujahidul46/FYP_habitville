@@ -28,4 +28,5 @@ urlpatterns = [
     path('update-reward/<int:pk>/', views.update_reward_view, name='update_reward'),
     path('list-categories/', views.list_categories_view, name='list_categories'),
     path('category-progress/', views.category_progress_view, name='category_progress_view'),
+    path('spend-habit-points-for-minigame/', views.spend_habit_points_for_minigame, name='spend_habit_points_for_minigame'),
 ]

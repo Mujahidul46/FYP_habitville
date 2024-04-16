@@ -87,6 +87,12 @@ export const useProfileStore = defineStore('profile', {
         this.user.life_points += parsedLP;
       }
     },
+    spendHabitPoints(pointsSpent) {
+      const points = parseInt(pointsSpent, 10);
+      if (!isNaN(points)) {
+        this.user.habit_points -= points;
+      }
+    },
     spendLifePoints(cost) {
       const lifePointsCost = parseFloat(cost);
       if (!isNaN(lifePointsCost)) {

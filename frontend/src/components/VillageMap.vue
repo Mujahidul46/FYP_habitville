@@ -1,13 +1,14 @@
 <template>
   <div id="game-container">
     <div v-if="!gameReady" class="loading-message">Loading...</div>
-    <button v-if="gameReady" @click="playMinigame" class="play-minigame-button">Play "Lucky Catch" Minigame</button>
+    <button v-if="gameReady" @click="playMinigame" class="play-minigame-button">Play "Lucky Catch" Minigame (100 HP)</button>
   </div>
 </template>
 
 <script>
 import Phaser from 'phaser';
 import { useRouter } from 'vue-router';
+import { useHabitPointsStore } from '@/stores/useHabitPointsStore';
 
 export default {
   data() {
@@ -16,18 +17,9 @@ export default {
       gameReady: false,
     };
   },
-  setup() {
-    const router = useRouter();
-
-    // Go to the FishingMinigame route
-    const playMinigame = () => {
-      router.push({ name: 'FishingMinigame' });
-    };
-
-    return { playMinigame };
-  },
-  mounted() {
+  async mounted() {
     this.initPhaserGame();
+    await this.fetchUserHabitPoints();
   },
   methods: {
     initPhaserGame() {
@@ -81,7 +73,25 @@ export default {
 
       this.game = new Phaser.Game(config);
     },
-  },
+    async fetchUserHabitPoints() {
+      const habitPointsStore = useHabitPointsStore();
+      await habitPointsStore.fetchHabitPoints();
+      this.gameReady = true;
+    },
+    async playMinigame() {
+      const habitPointsStore = useHabitPointsStore();
+      this.gameReady = false;
+
+      try {
+        await habitPointsStore.spendHabitPointsForMinigame(habitPointsStore.csrfToken);
+        this.$router.push({ name: 'FishingMinigame' }); // Go to the Fishing minigame route
+      } catch (error) {
+        console.error('Error playing minigame:', error);
+      } finally {
+        this.gameReady = true; // Re-enables the game after processing
+      }
+    }
+  }
 };
 </script>
 

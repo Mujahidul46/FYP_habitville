@@ -83,7 +83,7 @@
     <div v-else class="empty-habit-list">
       <div class="empty-habit-content">
         <h3 class="empty-title">You have no daily habits</h3>
-        <p>Add a new habit to get started!</p>
+        <p>Add a new habit to start earning Habit Points (HP) and Life Points (LP)!</p>
       </div>
     </div>
 
