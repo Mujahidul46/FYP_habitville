@@ -1,3 +1,9 @@
+To run the app, navigate to the folder in command prompt/miniconda prompt using:
+cd/file_path_to_project_here
+
+then run conda activate henv
+
+
 Assets used for my non-commercial, final year project "Habitville - Gamified Habit Tracker". No changes were made to any assets and they were used as found:
 
 1) tick habit sound effect
