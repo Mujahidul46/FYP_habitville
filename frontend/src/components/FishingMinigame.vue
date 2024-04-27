@@ -1,5 +1,7 @@
 <template>
-  <div id="fishing-minigame-container"></div>
+  <div id="fishing-minigame-container">
+    <div id="timer-container">{{ timerDisplay }}</div>
+  </div>
   <div id="fullscreen-toggle-container">
     <button @click="toggleFullscreen">
       <i class="fas fa-expand-arrows-alt"></i> Fullscreen
@@ -30,6 +32,9 @@ export default {
       barYPosition: window.innerHeight / 2,
       successMessageText: null,
       failMessageText: null,
+      timer: 300, // 5 mins
+      timerInterval: null, // ref to timer interval id
+      timerDisplay: '',
     };
   },
   setup() {
@@ -37,6 +42,17 @@ export default {
     return {};
   },
   mounted() {
+    // Start the timer
+    this.timerInterval = setInterval(() => {
+      if (this.timer > 0) {
+        this.timer--;
+        this.timerDisplay = this.formatTimerDisplay(this.timer);
+      } else {
+        this.stopTimer();
+        this.goBackToVillage(); // return to village route
+      }
+    }, 1000);
+    
     this.backgroundMusic = new Audio('/music/Sakura-Girl-Peach-chosic.com_.mp3');
     this.backgroundMusic.loop = true;
     this.backgroundMusic.play();
@@ -692,6 +708,18 @@ export default {
         }
       }
     },
+    formatTimerDisplay(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${min}:${sec.toString().padStart(2, '0')}`;
+    },
+    
+    stopTimer() {
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+    },
     goBackToVillage() {
       this.$router.push({ name: 'VillageMap' });
     },
@@ -705,6 +733,7 @@ export default {
       this.backgroundMusic.pause();
       this.backgroundMusic.currentTime = 0;
     }
+    this.stopTimer();
   },
 
 };
@@ -767,4 +796,17 @@ button i {
 .button-spacing {
   margin-bottom: 10px;
 }
+
+#timer-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #fff;
+  background-color: rgba(14, 150, 188, 0.75);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 1.15rem;
+  z-index: 1001;
+}
+
 </style>
