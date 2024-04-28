@@ -1,7 +1,26 @@
-To run the app, navigate to the folder in command prompt/miniconda prompt using:
+To run the app, first download, navigate to the folder in command prompt using:
 cd/file_path_to_project_here
 
-then run conda activate henv
+Create a virtual environment using: python -m venv habitville-env
+
+Activate the virtual environment: habitville-env\Scripts\activate
+
+Type: pip install -r requirements.txt
+
+run server: python manage.py runserver
+
+Now open another Command prompt window and navigate to frontend:
+cd path\to\FYP_habitville\frontend
+
+type: npm install
+
+type: npm run dev
+
+For website:  http://localhost:5173/
+and for django admin interface go to: http://127.0.0.1:8000/admin/
+
+
+
 
 
 Assets used for my non-commercial, final year project "Habitville - Gamified Habit Tracker". No changes were made to any assets and they were used as found:
