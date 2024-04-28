@@ -1,3 +1,6 @@
+Installation Instructions:
+Ensure that Python and Node.js/npm are already installed on the system and available in the system PATH
+
 To run the app, first download, navigate to the folder in command prompt using:
 cd/file_path_to_project_here
 
