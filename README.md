@@ -1,3 +1,5 @@
+Web app using Django + Vue
+
 Installation Instructions:
 Ensure that Python and Node.js/npm are already installed on the system and available in the system PATH
 
